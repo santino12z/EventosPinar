@@ -82,8 +82,9 @@
           <h3>1. Cliente, fecha y horario</h3>
           <div class="grid">
             <div>
-              <label>DNI del cliente</label>
-              <input name="dni" id="dniEvento" inputmode="numeric" required>
+              <label>Teléfono del cliente (WhatsApp)</label>
+              <input id="telEvento" inputmode="tel" placeholder="Ej: 11 3433-4894" autocomplete="off">
+              <input type="hidden" name="dni" id="dniEvento">
               <div class="info-dni" id="infoDni"></div>
             </div>
             <div>
@@ -254,7 +255,7 @@
   </div>
 </main>
 <script src="documentos-visor.js?v=1"></script>
-<script src="admin.js?v=13"></script>
+<script src="admin.js?v=14"></script>
 <script src="presupuestos-admin.js?v=1"></script>
 </body>
 </html>

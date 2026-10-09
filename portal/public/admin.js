@@ -128,7 +128,11 @@ function irA(vista, opciones = {}) {
   if (vista === 'nuevo') {
     if (opciones.fecha) $('#fechaEvento').value = opciones.fecha;
     actualizarDia();
-    if (opciones.dni) { $('#dniEvento').value = opciones.dni; buscarDniEvento(); }
+    if (opciones.dni) {
+      api(`/api/admin/clientes/${encodeURIComponent(opciones.dni)}`)
+        .then(f => { $('#telEvento').value = f.cliente.telefono || ''; buscarTelefonoEvento(); })
+        .catch(alertar);
+    }
     avisoFecha();
     actualizarRecomendacion();
   }
@@ -137,28 +141,38 @@ function irA(vista, opciones = {}) {
 }
 document.querySelectorAll('[data-ir]').forEach(b => b.addEventListener('click', () => irA(b.dataset.ir)));
 
-// Muestra quién es el cliente del DNI cargado en el formulario de evento
-let timerDni = null;
-function buscarDniEvento() {
-  const dni = $('#dniEvento').value.trim();
+// Solo los últimos 10 dígitos (código de área + número): ignora el 54, el 9 y el 0 o 15 opcionales
+const ultimos10 = v => String(v || '').replace(/\D/g, '').slice(-10);
+
+// Busca al cliente registrado por su teléfono y guarda su DNI para el evento
+let timerTel = null;
+function buscarTelefonoEvento() {
+  const tel = $('#telEvento').value;
   const info = $('#infoDni');
-  if (!dni) { info.textContent = ''; info.className = 'info-dni'; return; }
-  clearTimeout(timerDni);
-  timerDni = setTimeout(async () => {
+  $('#dniEvento').value = '';
+  const digitos = ultimos10(tel);
+  clearTimeout(timerTel);
+  if (digitos.length < 10) {
+    info.textContent = tel.trim() ? 'Escribí el número completo con código de área.' : '';
+    info.className = 'info-dni';
+    return;
+  }
+  timerTel = setTimeout(async () => {
     try {
-      const lista = await api(`/api/admin/clientes?q=${encodeURIComponent(dni)}`);
-      const c = lista.find(x => x.dni === dni);
+      const lista = await api(`/api/admin/clientes?q=${digitos}`);
+      const c = lista.find(x => ultimos10(x.telefono) === digitos);
       if (c) {
-        info.textContent = `✔ ${c.nombre}${c.telefono ? '' : ' · sin WhatsApp cargado'}`;
-        info.className = 'info-dni ok' + (c.telefono ? '' : ' aviso');
+        $('#dniEvento').value = c.dni;
+        info.textContent = `✔ ${c.nombre} · DNI ${c.dni}`;
+        info.className = 'info-dni ok';
       } else {
-        info.textContent = 'No hay cliente registrado con ese DNI. El evento queda guardado y se vincula cuando la persona se registre.';
+        info.textContent = 'No hay ningún cliente registrado con ese teléfono. Tiene que crear su cuenta en el portal con este número.';
         info.className = 'info-dni aviso';
       }
     } catch (err) { info.textContent = ''; }
   }, 300);
 }
-$('#dniEvento').addEventListener('input', buscarDniEvento);
+$('#telEvento').addEventListener('input', buscarTelefonoEvento);
 
 // ---------- Ingreso ----------
 $('#formLogin').onsubmit = async e => {
@@ -324,6 +338,7 @@ $('#formEvento').onsubmit = async e => {
   const datos = Object.fromEntries(new FormData(form).entries());
   if (datos.tipo === 'Otro') datos.tipo = 'Otro: ' + $('#tipoOtro').value.trim();
   datos.adicionales = selEvento ? selEvento.valores() : [];
+  if (!datos.dni) return mostrarMsgEvento('Ingresá el teléfono de un cliente registrado y esperá a que aparezca su nombre', 'error');
   datos.cuotas = [...document.querySelectorAll('#listaCuotas [data-cuota]')].map(f => ({
     monto: f.querySelector('[name=monto]').value,
     mes: f.querySelector('[name=mes]').value
