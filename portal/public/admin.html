@@ -6,12 +6,12 @@
 <title>Administración - Eventos Pinar</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="portal.css?v=8">
+<link rel="stylesheet" href="portal.css?v=9">
 <script src="sesion.js?v=4"></script>
 </head>
 <body>
 <header>
-  <h1>Eventos Pinar · Administración <small style="font-weight:400;opacity:.8">(v8)</small></h1>
+  <h1>Eventos Pinar · Administración</h1>
   <button class="sec peq oculto" id="btnSalir" type="button">Salir</button>
 </header>
 <main class="admin-main">
@@ -26,18 +26,133 @@
   </div>
 
   <div id="panelAdmin" class="oculto">
-    <div class="card cal-card">
-      <div class="cal-barra">
-        <button class="sec" type="button" id="calAnterior" aria-label="Mes anterior">&lsaquo;</button>
-        <h2 class="cal-titulo" id="calTitulo"></h2>
-        <button class="sec" type="button" id="calSiguiente" aria-label="Mes siguiente">&rsaquo;</button>
+
+    <!-- Inicio: botones de cada función -->
+    <section class="vista" id="vista-inicio">
+      <div class="menu-grid">
+        <button type="button" class="tile" data-ir="calendario">
+          <strong>Calendario</strong><span>Fechas libres y reservadas</span>
+        </button>
+        <button type="button" class="tile" data-ir="nuevo">
+          <strong>Nuevo evento</strong><span>Cargar una reserva y sus cuotas</span>
+        </button>
+        <button type="button" class="tile" data-ir="clientes">
+          <strong>Clientes</strong><span>Buscar y ver la información de cada cliente</span>
+        </button>
+        <button type="button" class="tile" data-ir="pagos">
+          <strong>Pagos por confirmar</strong><span>Comprobantes enviados por los clientes</span>
+          <em class="contador oculto" id="contPagos"></em>
+        </button>
+        <button type="button" class="tile" data-ir="eventos">
+          <strong>Eventos y cuotas</strong><span>Lista de todos los eventos</span>
+        </button>
+        <button type="button" class="tile" data-ir="whatsapp">
+          <strong>Recordatorios</strong><span>Avisos por WhatsApp de cuotas atrasadas</span>
+        </button>
       </div>
-      <div class="cal-subbarra">
-        <button class="sec peq" type="button" id="calHoy">Ir a hoy</button>
-        <span class="cal-leyenda"><span class="cal-dot libre"></span> Libre &nbsp; <span class="cal-dot ocupada"></span> Reservado</span>
+    </section>
+
+    <!-- Calendario -->
+    <section class="vista oculto" id="vista-calendario">
+      <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Calendario</h2></div>
+      <div class="card cal-card">
+        <div class="cal-barra">
+          <button class="sec" type="button" id="calAnterior" aria-label="Mes anterior">&lsaquo;</button>
+          <h2 class="cal-titulo" id="calTitulo"></h2>
+          <button class="sec" type="button" id="calSiguiente" aria-label="Mes siguiente">&rsaquo;</button>
+        </div>
+        <div class="cal-subbarra">
+          <button class="sec peq" type="button" id="calHoy">Ir a hoy</button>
+          <span class="cal-leyenda"><span class="cal-dot libre"></span> Libre &nbsp; <span class="cal-dot ocupada"></span> Reservado</span>
+        </div>
+        <p class="ayuda">Tocá un día libre para cargar un evento. Tocá un día reservado para ver el evento y el cliente.</p>
+        <div class="cal-grid" id="calGrid"></div>
       </div>
-      <div class="cal-grid" id="calGrid"></div>
-    </div>
+    </section>
+
+    <!-- Nuevo evento -->
+    <section class="vista oculto" id="vista-nuevo">
+      <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Nuevo evento</h2></div>
+      <div class="card">
+        <form id="formEvento">
+          <h3>1. Cliente y evento</h3>
+          <div class="grid">
+            <div>
+              <label>DNI del cliente</label>
+              <input name="dni" id="dniEvento" inputmode="numeric" required>
+              <div class="info-dni" id="infoDni"></div>
+            </div>
+            <div>
+              <label>Tipo de evento</label>
+              <select name="tipo" id="tipoEvento" required>
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+            <div><label>Fecha del evento</label><input name="fecha" id="fechaEvento" type="date" required></div>
+          </div>
+          <div id="tipoOtroWrap" class="oculto" style="margin-top:8px;">
+            <label>Especificá el tipo de evento</label>
+            <input id="tipoOtro" maxlength="100" placeholder="Ej: Aniversario de bodas">
+          </div>
+          <div class="msg" id="avisoFecha"></div>
+
+          <h3>2. Valores</h3>
+          <div class="grid">
+            <div><label>Seña ($)</label><input name="sena" id="sena" type="number" min="0" step="0.01" value="0" required></div>
+            <div><label>Valor final ($)</label><input name="valor_final" id="valorFinal" type="number" min="0" step="0.01" required></div>
+          </div>
+          <label>Adicionales</label>
+          <textarea name="adicionales" rows="2"></textarea>
+          <div class="recomendacion" id="recomendacion"></div>
+
+          <h3>3. Cuotas mensuales</h3>
+          <p class="ayuda">Cada cuota corresponde a un mes. El saldo (valor final menos seña) se reparte entre las cuotas. Después podés editar cada una.</p>
+          <div class="grid">
+            <div><label>Cantidad de cuotas</label><input id="gCantidad" type="number" min="1" max="60" value="6"></div>
+            <div><label>Primer mes de cuota</label><input id="gPrimera" type="month"></div>
+          </div>
+          <button class="sec peq" type="button" id="btnGenerar">Generar cuotas</button>
+          <div id="listaCuotas"></div>
+          <button class="sec peq" type="button" id="btnAgregarCuota">+ Agregar cuota</button>
+
+          <div class="acciones-form"><button type="submit">Guardar evento</button></div>
+          <div class="msg" id="msgEvento"></div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Clientes -->
+    <section class="vista oculto" id="vista-clientes">
+      <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Clientes</h2></div>
+      <div class="card">
+        <input id="buscarCliente" type="search" placeholder="Buscar por nombre, DNI, mail o WhatsApp" autocomplete="off">
+        <div id="resultadosClientes"></div>
+      </div>
+      <div id="fichaCliente"></div>
+    </section>
+
+    <!-- Pagos -->
+    <section class="vista oculto" id="vista-pagos">
+      <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Pagos por confirmar</h2></div>
+      <div class="card"><div id="listaPagos"></div></div>
+    </section>
+
+    <!-- Eventos -->
+    <section class="vista oculto" id="vista-eventos">
+      <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Eventos y cuotas</h2></div>
+      <div class="card"><div id="listaEventos"></div></div>
+    </section>
+
+    <!-- WhatsApp -->
+    <section class="vista oculto" id="vista-whatsapp">
+      <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Recordatorios de WhatsApp</h2></div>
+      <div class="card">
+        <p>Se avisa por WhatsApp una vez por cada cuota atrasada. La revisión también se hace sola cada hora.</p>
+        <button type="button" id="btnRevisarAtrasos">Revisar atrasos y enviar recordatorios</button>
+        <div class="msg" id="msgAtrasos"></div>
+        <div id="listaMensajes"></div>
+      </div>
+    </section>
 
     <div class="modal oculto" id="modalDia" role="dialog" aria-modal="true">
       <div class="modal-contenido">
@@ -45,77 +160,9 @@
         <div id="modalCuerpo"></div>
       </div>
     </div>
-
-    <div class="card">
-      <h2>Pagos por confirmar</h2>
-      <div id="listaPagos"></div>
-    </div>
-
-    <div class="card">
-      <h2>Nuevo evento</h2>
-      <form id="formEvento">
-        <div class="grid">
-          <div><label>DNI del cliente</label><input name="dni" inputmode="numeric" required></div>
-          <div>
-            <label>Tipo de evento</label>
-            <select name="tipo" id="tipoEvento" required>
-              <option value="">Seleccione...</option>
-            </select>
-          </div>
-          <div><label>Fecha del evento</label><input name="fecha" id="fechaEvento" type="date" required></div>
-          <div><label>Seña ($)</label><input name="sena" id="sena" type="number" min="0" step="0.01" value="0" required></div>
-          <div><label>Valor final ($)</label><input name="valor_final" id="valorFinal" type="number" min="0" step="0.01" required></div>
-        </div>
-        <div id="tipoOtroWrap" class="oculto" style="margin-top:8px;">
-          <label>Especificá el tipo de evento</label>
-          <input id="tipoOtro" maxlength="100" placeholder="Ej: Aniversario de bodas">
-        </div>
-        <div class="msg" id="avisoFecha"></div>
-        <label>Adicionales</label>
-        <textarea name="adicionales" rows="2"></textarea>
-
-        <div class="recomendacion" id="recomendacion"></div>
-
-        <h3>Generar cuotas mensuales automáticamente</h3>
-        <p style="margin:0 0 8px;font-size:.9rem;">Cada cuota corresponde a un mes. El saldo (valor final menos seña) se reparte entre las cuotas. Después podés editar cada una.</p>
-        <div class="grid">
-          <div><label>Cantidad de cuotas</label><input id="gCantidad" type="number" min="1" max="60" value="6"></div>
-          <div><label>Primer mes de cuota</label><input id="gPrimera" type="month"></div>
-        </div>
-        <button class="sec peq" type="button" id="btnGenerar">Generar cuotas</button>
-
-        <h3>Cuotas</h3>
-        <p style="margin:0 0 8px;font-size:.9rem;">Cada cuota se paga durante su mes. Si no se paga, queda atrasada y se envía un recordatorio por WhatsApp.</p>
-        <div id="listaCuotas"></div>
-        <button class="sec peq" type="button" id="btnAgregarCuota">+ Agregar cuota</button>
-        <div><button type="submit">Guardar evento</button></div>
-        <div class="msg" id="msgEvento"></div>
-      </form>
-    </div>
-
-    <div class="card">
-      <h2>Recordatorios de WhatsApp</h2>
-      <p style="font-size:.92rem;">Se avisa por WhatsApp una vez por cada cuota atrasada. La revisión también se hace sola cada hora.</p>
-      <button type="button" id="btnRevisarAtrasos">Revisar atrasos y enviar recordatorios</button>
-      <div class="msg" id="msgAtrasos"></div>
-      <div id="listaMensajes"></div>
-    </div>
-
-    <div class="card">
-      <h2>Buscar cliente</h2>
-      <p style="font-size:.92rem;">Buscá por nombre, DNI, mail o WhatsApp. Sin texto, se muestran todos los clientes.</p>
-      <input id="buscarCliente" type="search" placeholder="Nombre, DNI, mail o WhatsApp" autocomplete="off">
-      <div id="resultadosClientes"></div>
-      <div id="fichaCliente"></div>
-    </div>
-
-    <div class="card">
-      <h2>Eventos y cuotas</h2>
-      <div id="listaEventos"></div>
-    </div>
   </div>
 </main>
 <script src="documentos-visor.js?v=1"></script>
-<script src="admin.js?v=9"></script>
+<script src="admin.js?v=10"></script>
 </body>
 </html>

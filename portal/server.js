@@ -136,10 +136,10 @@ app.get('/api/admin/tipos-evento', auth.exigir('admin'), (req, res) => res.json(
 app.get('/api/admin/sesion', auth.exigir('admin'), (req, res) => res.json({ ok: true }));
 
 app.get('/api/admin/eventos', auth.exigir('admin'), (req, res) => {
-  const nombreStmt = db.prepare('SELECT nombre, mail FROM clientes WHERE dni = ?');
+  const nombreStmt = db.prepare('SELECT nombre, mail, telefono FROM clientes WHERE dni = ?');
   const eventos = eventosConCuotas().map(e => {
     const c = nombreStmt.get(e.dni);
-    return { ...e, cliente_nombre: c ? c.nombre : null, cliente_mail: c ? c.mail : null };
+    return { ...e, cliente_nombre: c ? c.nombre : null, cliente_mail: c ? c.mail : null, cliente_telefono: c ? c.telefono : null };
   });
   res.json(eventos);
 });

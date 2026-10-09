@@ -55,6 +55,44 @@ function mostrarPanel() {
   $('#btnSalir').classList.remove('oculto');
 }
 
+// ---------- Navegación entre vistas ----------
+function irA(vista, opciones = {}) {
+  document.querySelectorAll('.vista').forEach(v => v.classList.toggle('oculto', v.id !== 'vista-' + vista));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (vista === 'calendario') renderCalendario();
+  if (vista === 'nuevo') {
+    if (opciones.fecha) $('#fechaEvento').value = opciones.fecha;
+    if (opciones.dni) { $('#dniEvento').value = opciones.dni; buscarDniEvento(); }
+    avisoFecha();
+    actualizarRecomendacion();
+  }
+  if (vista === 'clientes' && opciones.dni) cargarFicha(opciones.dni).catch(alertar);
+}
+document.querySelectorAll('[data-ir]').forEach(b => b.addEventListener('click', () => irA(b.dataset.ir)));
+
+// Muestra quién es el cliente del DNI cargado en el formulario de evento
+let timerDni = null;
+function buscarDniEvento() {
+  const dni = $('#dniEvento').value.trim();
+  const info = $('#infoDni');
+  if (!dni) { info.textContent = ''; info.className = 'info-dni'; return; }
+  clearTimeout(timerDni);
+  timerDni = setTimeout(async () => {
+    try {
+      const lista = await api(`/api/admin/clientes?q=${encodeURIComponent(dni)}`);
+      const c = lista.find(x => x.dni === dni);
+      if (c) {
+        info.textContent = `✔ ${c.nombre}${c.telefono ? '' : ' · sin WhatsApp cargado'}`;
+        info.className = 'info-dni ok' + (c.telefono ? '' : ' aviso');
+      } else {
+        info.textContent = 'No hay cliente registrado con ese DNI. El evento queda guardado y se vincula cuando la persona se registre.';
+        info.className = 'info-dni aviso';
+      }
+    } catch (err) { info.textContent = ''; }
+  }, 300);
+}
+$('#dniEvento').addEventListener('input', buscarDniEvento);
+
 // ---------- Ingreso ----------
 $('#formLogin').onsubmit = async e => {
   e.preventDefault();
@@ -324,6 +362,7 @@ let calAnio = new Date().getFullYear();
 let calMes = new Date().getMonth(); // 0-11
 
 const isoDia = (anio, mes, dia) => `${anio}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+const aDate = iso => new Date(Date.UTC(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10))));
 const eventosDelDia = iso => eventosCache.filter(e => e.fecha.slice(0, 10) === iso);
 
 function renderCalendario() {
@@ -350,7 +389,7 @@ function renderCalendario() {
       txt('span', e.cliente_nombre || `DNI ${e.dni}`)
     )));
     if (ocupados.length > 2) celda.append(txt('div', `+${ocupados.length - 2} más`, 'cal-mas'));
-    celda.onclick = () => abrirDia(iso);
+    celda.onclick = () => (ocupados.length ? abrirDia(iso) : irA('nuevo', { fecha: iso }));
     grid.append(celda);
   }
 }
@@ -360,29 +399,23 @@ function cerrarModal() {
 }
 
 function abrirDia(iso) {
-  const caja = $('#modalCuerpo');
   const ocupados = eventosDelDia(iso);
+  if (!ocupados.length) return irA('nuevo', { fecha: iso });
+  const caja = $('#modalCuerpo');
   const hoy = hoyISO();
   const fechaTexto = `${DIAS_SEMANA[(aDate(iso).getUTCDay() + 6) % 7]} ${Number(iso.slice(8, 10))} de ${MESES[Number(iso.slice(5, 7)) - 1]} de ${iso.slice(0, 4)}`;
-
-  const titulo = txt('h3', fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1));
   $('#modalDia').classList.remove('oculto');
 
-  if (!ocupados.length) {
-    const botonCargar = txt('button', 'Cargar evento en esta fecha');
-    botonCargar.type = 'button';
-    botonCargar.onclick = () => {
-      $('#fechaEvento').value = iso;
-      avisoFecha();
-      actualizarRecomendacion();
-      cerrarModal();
-      $('#formEvento').scrollIntoView({ behavior: 'smooth' });
-    };
-    caja.replaceChildren(titulo, txt('span', 'LIBRE', 'estado libre'), txt('p', 'No hay eventos reservados para este día.'), botonCargar);
-    return;
-  }
+  const boton = (texto, accion, cls) => {
+    const b = txt('button', texto, cls || '');
+    b.type = 'button';
+    b.onclick = () => { cerrarModal(); accion(); };
+    return b;
+  };
 
-  caja.replaceChildren(titulo, txt('span', ocupados.length === 1 ? 'RESERVADO' : `RESERVADO · ${ocupados.length} EVENTOS`, 'estado ocupada'),
+  caja.replaceChildren(
+    txt('h3', fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1)),
+    txt('span', ocupados.length === 1 ? 'RESERVADO' : `RESERVADO · ${ocupados.length} EVENTOS`, 'estado ocupada'),
     ...ocupados.map(e => {
       const saldo = e.cuotas.filter(c => !c.pagada).reduce((s, c) => s + c.monto, 0);
       const pagado = e.cuotas.filter(c => c.pagada).reduce((s, c) => s + c.monto, 0) + Number(e.sena || 0);
@@ -400,6 +433,7 @@ function abrirDia(iso) {
         el('div', 'grid',
           el('div', 'dato', txt('small', 'Cliente'), txt('strong', e.cliente_nombre || 'Sin cuenta registrada')),
           el('div', 'dato', txt('small', 'DNI'), txt('strong', e.dni)),
+          el('div', 'dato', txt('small', 'WhatsApp'), txt('strong', e.cliente_telefono || '-')),
           el('div', 'dato', txt('small', 'Mail'), txt('strong', e.cliente_mail || '-')),
           el('div', 'dato', txt('small', 'Seña'), txt('strong', money(e.sena))),
           el('div', 'dato', txt('small', 'Valor final'), txt('strong', money(e.valor_final))),
@@ -407,9 +441,16 @@ function abrirDia(iso) {
           el('div', 'dato', txt('small', 'Saldo pendiente'), txt('strong', money(saldo)))
         ),
         el('p', null, txt('strong', 'Adicionales: '), document.createTextNode(e.adicionales || 'Ninguno')),
-        cuotas
+        cuotas,
+        el('div', 'acciones-evento',
+          boton('Ver ficha del cliente', () => irA('clientes', { dni: e.dni }), 'peq'),
+          boton('Ver contrato', () => abrirDocumento(`/api/admin/eventos/${e.id}/contrato`, `Contrato · ${e.tipo}`, {}).catch(alertar), 'sec peq'),
+          boton('Ver presupuesto', () => abrirDocumento(`/api/admin/eventos/${e.id}/presupuesto`, `Presupuesto · ${e.tipo}`, {}).catch(alertar), 'sec peq')
+        )
       );
-    }));
+    }),
+    el('div', 'acciones-form', boton('+ Agregar otro evento este día', () => irA('nuevo', { fecha: iso }), 'sec peq'))
+  );
 }
 
 $('#modalCerrar').onclick = cerrarModal;
@@ -479,6 +520,9 @@ async function cargarPagos() {
   const lista = $('#listaPagos');
   lista.replaceChildren();
   const pendientes = pagos.filter(p => p.estado === 'pendiente');
+  const contador = $('#contPagos');
+  contador.textContent = pendientes.length;
+  contador.classList.toggle('oculto', !pendientes.length);
   if (!pendientes.length) lista.append(txt('p', 'No hay pagos esperando confirmación.'));
   pagos.forEach(p => lista.append(tarjetaPago(p)));
 }
@@ -625,6 +669,7 @@ async function cargarTodo() {
 
 async function iniciar() {
   mostrarPanel();
+  irA('inicio');
   if (!$('#listaCuotas').children.length) $('#listaCuotas').append(filaCuota());
   try {
     await cargarTipos();
