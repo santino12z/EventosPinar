@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administración - Eventos Pinar</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="portal.css">
+</head>
+<body>
+<header>
+  <h1>Eventos Pinar · Administración</h1>
+  <button class="sec peq oculto" id="btnSalir" type="button">Salir</button>
+</header>
+<main>
+  <div class="card" id="loginCard" style="max-width:420px;margin:0 auto;">
+    <h2>Ingreso de administrador</h2>
+    <form id="formLogin">
+      <label>Contraseña</label>
+      <input name="password" type="password" required>
+      <button type="submit">Ingresar</button>
+      <div class="msg" id="msgLogin"></div>
+    </form>
+  </div>
+
+  <div id="panelAdmin" class="oculto">
+    <div class="card">
+      <h2>Nuevo evento</h2>
+      <form id="formEvento">
+        <div class="grid">
+          <div><label>DNI del cliente</label><input name="dni" inputmode="numeric" required></div>
+          <div><label>Tipo de evento</label><input name="tipo" placeholder="Casamiento, Quince..." required></div>
+          <div><label>Fecha del evento</label><input name="fecha" type="date" required></div>
+          <div><label>Seña ($)</label><input name="sena" type="number" min="0" step="0.01" value="0" required></div>
+          <div><label>Valor final ($)</label><input name="valor_final" type="number" min="0" step="0.01" required></div>
+        </div>
+        <label>Adicionales</label>
+        <textarea name="adicionales" rows="2"></textarea>
+
+        <h3>Cuotas</h3>
+        <div id="listaCuotas"></div>
+        <button class="sec peq" type="button" id="btnAgregarCuota">+ Agregar cuota</button>
+        <div><button type="submit">Guardar evento</button></div>
+        <div class="msg" id="msgEvento"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Eventos y cuotas</h2>
+      <div id="listaEventos"></div>
+    </div>
+  </div>
+</main>
+<script src="admin.js"></script>
+</body>
+</html>

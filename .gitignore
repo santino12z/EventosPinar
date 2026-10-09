@@ -1,0 +1,4 @@
+portal/node_modules/
+portal/data/
+*.db
+*.db-journal

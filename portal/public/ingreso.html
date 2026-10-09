@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de clientes - Eventos Pinar</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="portal.css">
+</head>
+<body>
+<header><h1>Eventos Pinar · Portal de clientes</h1><a href="../index.html">Volver al sitio</a></header>
+<main>
+  <div class="card" style="max-width:460px;margin:0 auto;">
+    <div class="tabs">
+      <button id="tabLogin" class="activo" type="button">Ingresar</button>
+      <button id="tabRegistro" type="button">Registrarme</button>
+    </div>
+
+    <form id="formLogin">
+      <label>DNI</label>
+      <input name="dni" inputmode="numeric" required>
+      <label>Contraseña</label>
+      <input name="password" type="password" required>
+      <button type="submit">Ingresar</button>
+      <div class="msg" id="msgLogin"></div>
+    </form>
+
+    <form id="formRegistro" class="oculto">
+      <label>Nombre completo</label>
+      <input name="nombre" required>
+      <label>DNI</label>
+      <input name="dni" inputmode="numeric" required>
+      <label>Mail</label>
+      <input name="mail" type="email" required>
+      <label>Contraseña (mínimo 8 caracteres)</label>
+      <input name="password" type="password" minlength="8" required>
+      <button type="submit">Crear cuenta</button>
+      <div class="msg" id="msgRegistro"></div>
+    </form>
+  </div>
+</main>
+<script src="ingreso.js"></script>
+</body>
+</html>

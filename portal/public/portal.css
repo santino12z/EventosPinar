@@ -1,0 +1,36 @@
+:root { --rosa:#c2185b; --gris:#333; --fondo:#f7f5f8; --verde:#2e7d32; --rojo:#c62828; --amarillo:#f9a825; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: "Open Sans", Arial, sans-serif; background:var(--fondo); color:var(--gris); }
+header { background:var(--rosa); color:#fff; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+header h1 { margin:0; font-size:1.3rem; font-family: Montserrat, Arial, sans-serif; }
+header a { color:#fff; }
+main { max-width:960px; margin:24px auto; padding:0 16px; }
+.card { background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,.08); padding:20px; margin-bottom:20px; }
+h2 { margin-top:0; font-family: Montserrat, Arial, sans-serif; color:var(--rosa); font-size:1.15rem; }
+label { display:block; font-size:.9rem; margin:10px 0 4px; }
+input, select, textarea { width:100%; padding:9px 10px; border:1px solid #ccc; border-radius:6px; font:inherit; }
+button { background:var(--rosa); color:#fff; border:0; border-radius:6px; padding:10px 16px; font:inherit; cursor:pointer; margin-top:12px; }
+button.sec { background:#777; }
+button.peq { padding:5px 10px; font-size:.85rem; margin:0; }
+button:disabled { opacity:.5; cursor:default; }
+.msg { margin-top:10px; font-size:.9rem; }
+.msg.error { color:var(--rojo); }
+.msg.ok { color:var(--verde); }
+table { width:100%; border-collapse:collapse; font-size:.92rem; }
+th, td { text-align:left; padding:8px 6px; border-bottom:1px solid #eee; vertical-align:top; }
+th { color:#666; font-weight:600; }
+.badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:.8rem; color:#fff; }
+.pagada { background:var(--verde); }
+.pendiente { background:var(--amarillo); color:#333; }
+.vencida { background:var(--rojo); }
+.grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:12px; }
+.dato { background:#fafafa; border-radius:8px; padding:12px; }
+.dato small { color:#777; display:block; }
+.dato strong { font-size:1.1rem; }
+.tabs { display:flex; gap:8px; margin-bottom:12px; }
+.tabs button { background:#ddd; color:#333; margin:0; }
+.tabs button.activo { background:var(--rosa); color:#fff; }
+.oculto { display:none; }
+.evento { border:1px solid #eee; border-radius:8px; padding:16px; margin-bottom:16px; }
+.evento h3 { margin:0 0 6px; font-family: Montserrat, Arial, sans-serif; font-size:1.05rem; }
+.fila-form { display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap:8px; align-items:end; }

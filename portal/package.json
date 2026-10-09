@@ -1,0 +1,17 @@
+{
+  "name": "portal-eventos-pinar",
+  "version": "1.0.0",
+  "description": "Portal de clientes de Eventos Pinar: eventos, cuotas e historial",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "express": "^4.22.3"
+  }
+}
