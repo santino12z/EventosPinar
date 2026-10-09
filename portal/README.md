@@ -67,3 +67,7 @@ Antes de publicarlo en internet: servir detrás de HTTPS y definir una `ADMIN_PA
 - Subida de comprobantes de pago por parte del cliente.
 - Envío automático de recordatorios de vencimiento.
 - Generar el contrato en PDF con los datos del evento.
+
+### Datos del salón para el contrato
+
+Completar `portal/contrato/datos_salon.json` (razón social, CUIT, domicilio, horarios, capacidad, porcentajes de mora y cancelación, garantía). Los campos vacíos aparecen como `[completar]` en el contrato y el presupuesto.

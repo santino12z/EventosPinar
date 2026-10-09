@@ -183,6 +183,13 @@ function tarjetaEvento(e, hoy, conPago) {
     txt('h4', 'Cuotas'),
     tablaCuotas(e, hoy, conPago)
   ];
+  const botonDoc = (texto, tipo) => {
+    const b = txt('button', texto, 'sec peq');
+    b.type = 'button';
+    b.onclick = () => abrirDocumento(`/api/mis-eventos/${e.id}/${tipo}`, `${texto.replace('Ver ', '')} · ${e.tipo}`).catch(err => alert(err.message));
+    return b;
+  };
+  hijos.splice(3, 0, el('div', 'acciones-evento', botonDoc('Ver contrato', 'contrato'), botonDoc('Ver presupuesto', 'presupuesto')));
   let formulario = null;
   if (conPago && e.cuotas.some(sePuedePagar)) {
     formulario = formularioPago(e);

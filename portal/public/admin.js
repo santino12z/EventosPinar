@@ -512,31 +512,115 @@ $('#btnRevisarAtrasos').onclick = async () => {
   }
 };
 
-async function cargarSinTelefono() {
-  const clientes = await api('/api/admin/clientes-sin-telefono');
-  const lista = $('#listaSinTelefono');
+// ---------- Buscador de clientes y ficha ----------
+let timerBusqueda = null;
+
+async function buscarClientes() {
+  const q = $('#buscarCliente').value.trim();
+  const clientes = await api(`/api/admin/clientes?q=${encodeURIComponent(q)}`);
+  const lista = $('#resultadosClientes');
   lista.replaceChildren();
-  if (!clientes.length) { lista.append(txt('p', 'Todos los clientes tienen teléfono cargado.')); return; }
-  clientes.forEach(c => {
-    const input = Object.assign(document.createElement('input'), { placeholder: '5491134334894' });
-    const boton = txt('button', 'Guardar', 'peq');
-    boton.onclick = async () => {
-      try {
-        await api(`/api/admin/clientes/${c.dni}/telefono`, 'PUT', { telefono: input.value });
-        cargarSinTelefono();
-      } catch (err) { alertar(err); }
-    };
-    lista.append(el('div', 'fila-form',
-      el('div', null, txt('strong', c.nombre), txt('small', ` · DNI ${c.dni}`)),
-      el('div', null, input),
-      el('div', null),
-      el('div', null, boton)
-    ));
-  });
+  if (!clientes.length) { lista.append(txt('p', 'No se encontraron clientes.')); return; }
+  lista.append(el('table', null,
+    el('thead', null, el('tr', null, ...['Nombre', 'DNI', 'Mail', 'WhatsApp', 'Eventos'].map(t => txt('th', t)))),
+    el('tbody', null, ...clientes.map(c => {
+      const fila = el('tr', 'fila-clickable',
+        txt('td', c.nombre), txt('td', c.dni), txt('td', c.mail), txt('td', c.telefono || 'Sin cargar'), txt('td', String(c.eventos)));
+      fila.style.cursor = 'pointer';
+      fila.onclick = () => cargarFicha(c.dni);
+      return fila;
+    }))));
 }
 
+async function cargarFicha(dni) {
+  const f = await api(`/api/admin/clientes/${encodeURIComponent(dni)}`);
+  const ficha = $('#fichaCliente');
+  ficha.replaceChildren();
+  const hoy = hoyISO();
+
+  // Datos y WhatsApp
+  const inputTel = Object.assign(document.createElement('input'), { placeholder: '5491134334894', value: f.cliente.telefono || '' });
+  const guardarTel = txt('button', 'Guardar WhatsApp', 'sec peq');
+  guardarTel.type = 'button';
+  guardarTel.onclick = async () => {
+    try {
+      await api(`/api/admin/clientes/${f.cliente.dni}/telefono`, 'PUT', { telefono: inputTel.value });
+      cargarFicha(dni); buscarClientes();
+    } catch (err) { alertar(err); }
+  };
+  ficha.append(el('div', 'card',
+    txt('h3', `${f.cliente.nombre} · DNI ${f.cliente.dni}`),
+    txt('p', `Mail: ${f.cliente.mail}`),
+    el('div', 'fila-form', el('div', null, txt('small', 'WhatsApp (54 + código de área + número)'), inputTel), el('div', null), el('div', null), el('div', null, guardarTel))
+  ));
+
+  // Eventos con cuotas y documentos
+  if (!f.eventos.length) ficha.append(txt('p', 'Este cliente todavía no tiene eventos.'));
+  f.eventos.forEach(e => {
+    const botonDoc = (texto, tipo) => {
+      const b = txt('button', texto, 'sec peq');
+      b.type = 'button';
+      b.onclick = () => abrirDocumento(`/api/admin/eventos/${e.id}/${tipo}`, `${texto.replace('Ver ', '')} · ${e.tipo}`, {}).catch(alertar);
+      return b;
+    };
+    const saldo = e.cuotas.filter(c => !c.pagada).reduce((s, c) => s + c.monto, 0);
+    ficha.append(el('div', 'card',
+      txt('h3', `${e.tipo} · ${fechaLarga(e.fecha)}`),
+      txt('p', `Seña ${money(e.sena)} · Valor final ${money(e.valor_final)} · Saldo pendiente ${money(saldo)}`),
+      txt('p', `Adicionales: ${e.adicionales || 'Ninguno'}`),
+      el('div', 'acciones-evento', botonDoc('Ver contrato', 'contrato'), botonDoc('Ver presupuesto', 'presupuesto')),
+      el('table', null,
+        el('thead', null, el('tr', null, ...['Cuota', 'Mes', 'Monto', 'Estado'].map(t => txt('th', t)))),
+        el('tbody', null, ...e.cuotas.map(c => el('tr', null,
+          txt('td', `#${c.numero}`), txt('td', nombreMes(c.mes)), txt('td', money(c.monto)),
+          txt('td', estadoCuotaAdmin(c, hoy))))))
+    ));
+  });
+
+  // Pagos informados
+  const bloquePagos = el('div', 'card', txt('h3', 'Pagos informados'));
+  if (!f.pagos.length) bloquePagos.append(txt('p', 'No hay pagos informados.'));
+  else bloquePagos.append(el('table', null,
+    el('thead', null, el('tr', null, ...['Fecha de transferencia', 'Monto', 'Estado', 'Comprobante'].map(t => txt('th', t)))),
+    el('tbody', null, ...f.pagos.map(p => {
+      const ver = txt('button', 'Ver', 'sec peq');
+      ver.type = 'button';
+      const visor = el('div');
+      ver.onclick = async () => {
+        try {
+          const url = await descargarProtegido(`/api/admin/pagos/${p.id}/comprobante`);
+          visor.replaceChildren();
+          if (p.mime === 'application/pdf') visor.append(Object.assign(document.createElement('a'), { href: url, target: '_blank', textContent: 'Abrir PDF' }));
+          else visor.append(Object.assign(document.createElement('img'), { src: url, style: 'max-width:280px;border:1px solid #ddd;border-radius:6px;margin-top:6px;' }));
+        } catch (err) { alertar(err); }
+      };
+      return el('tr', null,
+        txt('td', p.fecha_transferencia), txt('td', money(p.monto)),
+        txt('td', p.estado === 'aprobado' ? 'Aprobado' : (p.estado === 'rechazado' ? `Rechazado${p.motivo ? ': ' + p.motivo : ''}` : 'En revisión')),
+        el('td', null, ver, visor));
+    }))));
+  ficha.append(bloquePagos);
+
+  // Mensajes de WhatsApp
+  const bloqueMsj = el('div', 'card', txt('h3', 'Recordatorios de WhatsApp'));
+  if (!f.mensajes.length) bloqueMsj.append(txt('p', 'No se enviaron recordatorios.'));
+  else bloqueMsj.append(el('table', null,
+    el('thead', null, el('tr', null, ...['Mes', 'Monto', 'Estado', 'Detalle'].map(t => txt('th', t)))),
+    el('tbody', null, ...f.mensajes.map(m => el('tr', null,
+      txt('td', nombreMes(m.mes)), txt('td', money(m.monto)),
+      txt('td', m.estado === 'enviado' ? 'Enviado' : (m.estado === 'error' ? 'No enviado' : 'Pendiente')),
+      txt('td', m.estado === 'enviado' ? `Enviado ${m.enviado_en || ''}` : (m.error || '-')))))));
+  ficha.append(bloqueMsj);
+  ficha.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+$('#buscarCliente').addEventListener('input', () => {
+  clearTimeout(timerBusqueda);
+  timerBusqueda = setTimeout(() => buscarClientes().catch(alertar), 250);
+});
+
 async function cargarTodo() {
-  await Promise.all([cargarPagos(), cargarEventos(), cargarMensajes(), cargarSinTelefono()]);
+  await Promise.all([cargarPagos(), cargarEventos(), cargarMensajes(), buscarClientes()]);
 }
 
 async function iniciar() {

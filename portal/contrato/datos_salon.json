@@ -1,0 +1,16 @@
+{
+  "_nota": "Completar cada campo vacío antes de usar el contrato con clientes. Los campos vacíos aparecen como [completar] en el contrato.",
+  "nombre_salon": "Eventos Pinar",
+  "razon_social": "",
+  "cuit": "",
+  "domicilio_salon": "",
+  "horario_desde": "",
+  "horario_hasta": "",
+  "capacidad": "",
+  "interes_mora": "",
+  "dias_rescision": "",
+  "dias_cancelacion": "",
+  "porcentaje_devolucion": "",
+  "garantia": "",
+  "dias_devolucion_garantia": ""
+}

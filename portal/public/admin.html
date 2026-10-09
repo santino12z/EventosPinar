@@ -6,7 +6,7 @@
 <title>Administración - Eventos Pinar</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="portal.css?v=7">
+<link rel="stylesheet" href="portal.css?v=8">
 <script src="sesion.js?v=4"></script>
 </head>
 <body>
@@ -102,9 +102,11 @@
     </div>
 
     <div class="card">
-      <h2>Clientes sin teléfono de WhatsApp</h2>
-      <p style="font-size:.92rem;">Sin teléfono no se les puede enviar recordatorios.</p>
-      <div id="listaSinTelefono"></div>
+      <h2>Buscar cliente</h2>
+      <p style="font-size:.92rem;">Buscá por nombre, DNI, mail o WhatsApp. Sin texto, se muestran todos los clientes.</p>
+      <input id="buscarCliente" type="search" placeholder="Nombre, DNI, mail o WhatsApp" autocomplete="off">
+      <div id="resultadosClientes"></div>
+      <div id="fichaCliente"></div>
     </div>
 
     <div class="card">
@@ -113,6 +115,7 @@
     </div>
   </div>
 </main>
-<script src="admin.js?v=8"></script>
+<script src="documentos-visor.js?v=1"></script>
+<script src="admin.js?v=9"></script>
 </body>
 </html>

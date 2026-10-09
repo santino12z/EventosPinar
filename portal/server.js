@@ -207,6 +207,35 @@ app.post('/api/admin/cuotas/:id/desmarcar', auth.exigir('admin'), (req, res) => 
 require('./pagos')(app);
 
 const whatsapp = require('./whatsapp');
+require('./documentos')(app);
+
+// Buscador de clientes (todos, o filtrados por nombre, DNI, mail o teléfono)
+app.get('/api/admin/clientes', auth.exigir('admin'), (req, res) => {
+  const q = String(req.query.q || '').trim();
+  const like = `%${q}%`;
+  res.json(db.prepare(`
+    SELECT c.nombre, c.dni, c.mail, c.telefono,
+           (SELECT COUNT(*) FROM eventos e WHERE e.dni = c.dni) AS eventos
+    FROM clientes c
+    WHERE ? = '' OR c.nombre LIKE ? OR c.dni LIKE ? OR c.mail LIKE ? OR c.telefono LIKE ?
+    ORDER BY c.nombre LIMIT 300`).all(q, like, like, like, like));
+});
+
+// Ficha completa de un cliente: datos, eventos con cuotas, pagos y mensajes
+app.get('/api/admin/clientes/:dni', auth.exigir('admin'), (req, res) => {
+  const dni = String(req.params.dni);
+  const cliente = db.prepare('SELECT nombre, dni, mail, telefono, creado_en FROM clientes WHERE dni = ?').get(dni);
+  if (!cliente) return res.status(404).json({ error: 'Cliente no encontrado' });
+  res.json({
+    cliente,
+    eventos: eventosConCuotas('WHERE dni = ?', [dni]),
+    pagos: db.prepare(`SELECT id, monto, fecha_transferencia, estado, motivo, creado_en, mime
+                       FROM pagos WHERE dni = ? ORDER BY id DESC`).all(dni),
+    mensajes: db.prepare(`SELECT m.id, m.tipo, m.estado, m.error, m.enviado_en, c.mes, c.monto
+                          FROM mensajes m LEFT JOIN cuotas c ON c.id = m.cuota_id
+                          WHERE m.dni = ? ORDER BY m.id DESC`).all(dni)
+  });
+});
 
 app.post('/api/admin/atrasos/revisar', auth.exigir('admin'), async (req, res) => {
   const a = await whatsapp.revisarAtrasos();
@@ -220,10 +249,6 @@ app.get('/api/admin/mensajes', auth.exigir('admin'), (req, res) => {
                        LEFT JOIN cuotas c ON c.id = m.cuota_id
                        LEFT JOIN clientes cl ON cl.dni = m.dni
                        ORDER BY m.id DESC LIMIT 200`).all());
-});
-
-app.get('/api/admin/clientes-sin-telefono', auth.exigir('admin'), (req, res) => {
-  res.json(db.prepare("SELECT nombre, dni, mail FROM clientes WHERE telefono IS NULL OR telefono = '' ORDER BY nombre").all());
 });
 
 app.put('/api/admin/clientes/:dni/telefono', auth.exigir('admin'), (req, res) => {
