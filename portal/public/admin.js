@@ -1,5 +1,8 @@
 const $ = s => document.querySelector(s);
 
+// Selector de adicionales del formulario de evento (se crea al entrar)
+let selEvento = null;
+
 function el(tag, cls, ...hijos) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -60,7 +63,7 @@ const DIAS_NOMBRE = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Vier
 
 // Opciones de hora: cada 30 minutos (00:00 a 23:30)
 function poblarHoras() {
-  for (const id of ['#horaInicio', '#horaFin']) {
+  for (const id of ['#horaInicio', '#horaFin', '#presHoraInicio', '#presHoraFin']) {
     const select = $(id);
     select.replaceChildren(new Option('Seleccione...', ''));
     for (let m = 0; m < 1440; m += 30) {
@@ -110,15 +113,8 @@ function actualizarInvitados() {
   $('#totalInvitados').value = total;
 }
 
-async function cargarAdicionales() {
-  const lista = await api('/api/admin/adicionales');
-  $('#listaAdicionales').replaceChildren(...lista.map(nombre => {
-    const cb = Object.assign(document.createElement('input'), { type: 'checkbox', name: 'adicionales', value: nombre });
-    return el('label', null, cb, document.createTextNode(nombre));
-  }));
-}
-
 function limpiarCamposEvento() {
+  if (selEvento) selEvento.limpiar();
   actualizarDuracion();
   actualizarDia();
   actualizarInvitados();
@@ -137,6 +133,7 @@ function irA(vista, opciones = {}) {
     actualizarRecomendacion();
   }
   if (vista === 'clientes' && opciones.dni) cargarFicha(opciones.dni).catch(alertar);
+  if (vista === 'presupuestos') cargarPresupuestos().catch(alertar);
 }
 document.querySelectorAll('[data-ir]').forEach(b => b.addEventListener('click', () => irA(b.dataset.ir)));
 
@@ -326,7 +323,7 @@ $('#formEvento').onsubmit = async e => {
   const form = e.target;
   const datos = Object.fromEntries(new FormData(form).entries());
   if (datos.tipo === 'Otro') datos.tipo = 'Otro: ' + $('#tipoOtro').value.trim();
-  datos.adicionales = [...form.querySelectorAll('input[name=adicionales]:checked')].map(cb => cb.value);
+  datos.adicionales = selEvento ? selEvento.valores() : [];
   datos.cuotas = [...document.querySelectorAll('#listaCuotas [data-cuota]')].map(f => ({
     monto: f.querySelector('[name=monto]').value,
     mes: f.querySelector('[name=mes]').value
@@ -754,7 +751,7 @@ async function iniciar() {
   if (!$('#listaCuotas').children.length) $('#listaCuotas').append(filaCuota());
   try {
     await cargarTipos();
-    await cargarAdicionales();
+    await prepararFormularios();
     await cargarTodo();
     actualizarRecomendacion();
   } catch (err) { mostrarLogin(); }

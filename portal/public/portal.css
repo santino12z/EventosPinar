@@ -120,3 +120,10 @@ main.admin-main { max-width: 1400px; }
 .lista-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; margin: 6px 0 4px; }
 .lista-checks label { display: flex; align-items: center; gap: 8px; font-weight: 400; margin: 0; cursor: pointer; }
 .lista-checks input { width: auto; }
+.chips { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; min-height:28px; align-items:center; }
+.chip { width:auto; background:#f5eef0; color:#7a2b45; border:1px solid #e3c9d2; border-radius:999px; padding:4px 10px; font-size:.88rem; cursor:pointer; }
+.chip:hover { background:#ecd9e0; }
+.oculto { display:none !important; }
+.acciones-tabla { white-space: nowrap; }
+.acciones-tabla button { margin: 2px 4px 2px 0; width: auto; padding: 4px 10px; font-size: .85rem; }
+code { word-break: break-all; font-size: .85rem; }

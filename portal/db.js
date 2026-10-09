@@ -95,4 +95,25 @@ for (const [nombre, tipo] of [['horario_inicio', 'TEXT'], ['horario_fin', 'TEXT'
   if (!columnasEventos.includes(nombre)) db.exec(`ALTER TABLE eventos ADD COLUMN ${nombre} ${tipo}`);
 }
 
+// Presupuestos independientes (no ligados a un evento). El id autoincremental es el número de orden.
+db.exec(`
+CREATE TABLE IF NOT EXISTS presupuestos (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  token           TEXT NOT NULL UNIQUE,
+  cliente_nombre  TEXT,
+  tipo            TEXT NOT NULL,
+  fecha           TEXT,
+  horario_inicio  TEXT,
+  horario_fin     TEXT,
+  adultos         INTEGER,
+  ninos           INTEGER,
+  adicionales     TEXT NOT NULL DEFAULT '',
+  sena            REAL NOT NULL DEFAULT 0,
+  valor_final     REAL NOT NULL,
+  cuotas          TEXT NOT NULL DEFAULT '[]',
+  creado_en       TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+  actualizado_en  TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
+`);
+
 module.exports = db;

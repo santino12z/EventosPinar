@@ -39,6 +39,9 @@
         <button type="button" class="tile" data-ir="clientes">
           <strong>Clientes</strong><span>Buscar y ver la información de cada cliente</span>
         </button>
+        <button type="button" class="tile" data-ir="presupuestos">
+          <strong>Presupuestos</strong><span>Crear, numerar y compartir por WhatsApp</span>
+        </button>
         <button type="button" class="tile" data-ir="pagos">
           <strong>Pagos por confirmar</strong><span>Comprobantes enviados por los clientes</span>
           <em class="contador oculto" id="contPagos"></em>
@@ -119,7 +122,7 @@
           </div>
 
           <h3>3. Adicionales</h3>
-          <div id="listaAdicionales" class="lista-checks"></div>
+          <div id="selAdicionalesEvento"></div>
 
           <h3>4. Valores</h3>
           <div class="grid">
@@ -154,6 +157,70 @@
       <div id="fichaCliente"></div>
     </section>
 
+    <!-- Presupuestos -->
+    <section class="vista oculto" id="vista-presupuestos">
+      <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Presupuestos</h2></div>
+      <div class="card" id="cardListaPresupuestos">
+        <div class="acciones-form"><button type="button" id="btnNuevoPresupuesto">+ Crear presupuesto</button></div>
+        <input id="buscarPresupuesto" type="search" placeholder="Buscar por N° (ej: PRE-0004), cliente o tipo" autocomplete="off">
+        <div id="listaPresupuestos"></div>
+      </div>
+      <div class="card oculto" id="cardFormPresupuesto">
+        <h3 id="presTitulo">Nuevo presupuesto</h3>
+        <form id="formPresupuesto">
+          <div class="grid">
+            <div><label>Nombre del cliente (opcional)</label><input name="cliente_nombre" maxlength="120" placeholder="Se usa solo como referencia"></div>
+            <div>
+              <label>Tipo de evento</label>
+              <select name="tipo" id="presTipo" required><option value="">Seleccione...</option></select>
+            </div>
+          </div>
+          <div id="presTipoOtroWrap" class="oculto" style="margin-top:8px;">
+            <label>Especificá el tipo de evento</label>
+            <input id="presTipoOtro" maxlength="100" placeholder="Ej: Aniversario de bodas">
+          </div>
+          <div class="grid" style="margin-top:8px;">
+            <div>
+              <label>Fecha del evento (opcional)</label>
+              <input name="fecha" id="presFecha" type="date">
+              <div class="ayuda" id="presDia"></div>
+            </div>
+            <div><label>Hora de inicio</label><select name="horario_inicio" id="presHoraInicio"></select></div>
+            <div><label>Hora de fin</label><select name="horario_fin" id="presHoraFin"></select><div class="ayuda" id="presDuracion"></div></div>
+          </div>
+
+          <h3>Invitados</h3>
+          <div class="grid">
+            <div><label>Cantidad de adultos</label><input name="adultos" id="presAdultos" type="number" min="0" step="1" value="0"></div>
+            <div><label>Cantidad de niños</label><input name="ninos" id="presNinos" type="number" min="0" step="1" value="0"></div>
+            <div><label>Total de invitados</label><input id="presTotal" value="0" readonly></div>
+          </div>
+
+          <h3>Adicionales</h3>
+          <div id="selAdicionalesPres"></div>
+
+          <h3>Valores y cuotas</h3>
+          <div class="grid">
+            <div><label>Seña ($)</label><input name="sena" id="presSena" type="number" min="0" step="0.01" value="0"></div>
+            <div><label>Valor final ($)</label><input name="valor_final" id="presValor" type="number" min="0" step="0.01" required></div>
+          </div>
+          <div class="grid" style="margin-top:8px;">
+            <div><label>Cantidad de cuotas</label><input id="presCantidad" type="number" min="1" max="60" value="6"></div>
+            <div><label>Primer mes de cuota</label><input id="presPrimera" type="month"></div>
+          </div>
+          <button class="sec peq" type="button" id="btnGenerarPres">Generar cuotas</button>
+          <div id="presCuotas"></div>
+          <button class="sec peq" type="button" id="btnAgregarCuotaPres">+ Agregar cuota</button>
+
+          <div class="acciones-form">
+            <button type="submit">Guardar presupuesto</button>
+            <button type="button" class="sec" id="btnCancelarPres">Cancelar</button>
+          </div>
+          <div class="msg" id="msgPres"></div>
+        </form>
+      </div>
+    </section>
+
     <!-- Pagos -->
     <section class="vista oculto" id="vista-pagos">
       <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Pagos por confirmar</h2></div>
@@ -186,6 +253,7 @@
   </div>
 </main>
 <script src="documentos-visor.js?v=1"></script>
-<script src="admin.js?v=11"></script>
+<script src="admin.js?v=13"></script>
+<script src="presupuestos-admin.js?v=1"></script>
 </body>
 </html>

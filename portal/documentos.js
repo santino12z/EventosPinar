@@ -10,6 +10,7 @@ const DATOS = path.join(__dirname, 'contrato', 'datos_salon.json');
 const FALTA = '[completar]';
 const { duracionTexto } = require('./eventos-datos');
 
+
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 const money = n => '$ ' + Number(n || 0).toLocaleString('es-AR', { maximumFractionDigits: 2 });
 const fechaLarga = iso => { if (!iso) return '-'; const [y, m, d] = iso.slice(0, 10).split('-'); return `${d}/${m}/${y}`; };
@@ -110,46 +111,87 @@ function cronogramaHtml(e, sena, saldo) {
     </tbody></table>${aviso}`;
 }
 
-function presupuestoHtml(e) {
-  const datos = datosSalon();
-  const sena = Number(e.sena || 0);
-  const saldo = Number(e.valor_final || 0) - sena;
-  const pagado = sena + e.cuotas.filter(c => c.pagada).reduce((s, c) => s + Number(c.monto), 0);
-  const pendiente = Number(e.valor_final || 0) - pagado;
-  const sumaCuotas = e.cuotas.reduce((s, c) => s + Number(c.monto), 0);
+// Presupuesto genérico. p = {
+//   numero (texto), cliente ({nombre, dni, mail} | null),
+//   datos ({tipo, fecha, horario_inicio, horario_fin, adultos, ninos, adicionales, sena, valor_final}),
+//   cuotas ([{numero, mes, monto, estado?}]), resumen (opcional: {pagado, pendiente})
+// }
+function renderPresupuesto(p) {
+  const d = p.datos;
+  const sena = Number(d.sena || 0);
+  const valor = Number(d.valor_final || 0);
+  const saldo = valor - sena;
+  const adicionales = String(d.adicionales || '').split(', ').filter(Boolean);
+  const horario = d.horario_inicio && d.horario_fin
+    ? `${d.horario_inicio} a ${d.horario_fin} (${duracionTexto(d.horario_inicio, d.horario_fin)})` : 'Sin cargar';
+  const invitados = d.adultos != null
+    ? `${Number(d.adultos) + Number(d.ninos || 0)} (${d.adultos} adultos, ${Number(d.ninos || 0)} niños)` : 'Sin cargar';
   const fila = (a, b) => `<tr><td>${a}</td><td class="num">${b}</td></tr>`;
+  const conEstado = p.cuotas.some(c => c.estado);
+  const cuotas = p.cuotas.length
+    ? `<table><thead><tr><th>Cuota</th><th>Mes</th><th>Monto</th>${conEstado ? '<th>Estado</th>' : ''}</tr></thead><tbody>
+       ${p.cuotas.map(c => `<tr><td>#${c.numero}</td><td>${escapar(nombreMes(c.mes))}</td><td>${money(c.monto)}</td>${conEstado ? `<td>${escapar(c.estado)}</td>` : ''}</tr>`).join('')}
+       </tbody></table>`
+    : '<p>Sin cuotas cargadas.</p>';
+  const sumaCuotas = p.cuotas.reduce((s, c) => s + Number(c.monto), 0);
+  const aviso = p.cuotas.length && Math.abs(sumaCuotas - saldo) > 0.01
+    ? `<p class="falta">Atención: la suma de las cuotas (${money(sumaCuotas)}) no coincide con el saldo (${money(saldo)}).</p>` : '';
+  const cliente = p.cliente
+    ? `<div class="bloque"><p><strong>Cliente:</strong> ${escapar(p.cliente.nombre || '-')}${p.cliente.dni ? ' · DNI ' + escapar(p.cliente.dni) : ''}</p>
+       ${p.cliente.mail ? `<p><strong>Mail:</strong> ${escapar(p.cliente.mail)}</p>` : ''}</div>` : '';
+  const resumen = p.resumen
+    ? `<h2>Resumen</h2><table><tbody>${fila('Pagado hasta hoy (seña y cuotas)', money(p.resumen.pagado))}${fila('Pendiente de pago', money(p.resumen.pendiente))}</tbody></table>` : '';
+
   return `
   <div class="cabecera">
-    <div><h1>Presupuesto</h1><p>${escapar(datos.nombre_salon || 'Salón')}${datos.razon_social ? ' · ' + escapar(datos.razon_social) : ''}</p></div>
-    <div class="derecha"><p>Emitido: ${fechaLarga(hoyLocal())}</p></div>
+    <div><h1>Presupuesto</h1><p>${escapar(datosSalon().nombre_salon || 'Salón')}${datosSalon().razon_social ? ' · ' + escapar(datosSalon().razon_social) : ''}</p></div>
+    <div class="derecha"><p><strong>N° ${escapar(p.numero)}</strong></p><p>Emitido: ${fechaLarga(hoyLocal())}</p></div>
   </div>
-  <div class="bloque">
-    <p><strong>Cliente:</strong> ${escapar(e.cliente_nombre || '-')} · DNI ${escapar(e.dni)}</p>
-    <p><strong>Mail:</strong> ${escapar(e.cliente_mail || '-')}</p>
-    <p><strong>Evento:</strong> ${escapar(e.tipo)} · ${fechaLarga(e.fecha)}</p>
-  </div>
-  <h2>Detalle del valor</h2>
-  <table>
-    <tbody>
-      ${fila('Horario', e.horario_inicio && e.horario_fin ? `${e.horario_inicio} a ${e.horario_fin} (${duracionTexto(e.horario_inicio, e.horario_fin)})` : '-')}
-      ${fila('Invitados', e.adultos != null ? `${Number(e.adultos) + Number(e.ninos || 0)} (${e.adultos} adultos, ${e.ninos || 0} niños)` : '-')}
-      ${fila('Valor total del evento', money(e.valor_final))}
-      ${fila('Seña (al firmar)', money(sena))}
-      ${fila('Saldo a pagar en cuotas mensuales', money(saldo))}
-    </tbody>
-  </table>
-  <h2>Adicionales contratados</h2>
-  <p>${escapar(e.adicionales || 'Ninguno')}</p>
-  <h2>Cuotas</h2>
-  ${cronogramaHtml(e, sena, saldo)}
-  <h2>Resumen</h2>
-  <table>
-    <tbody>
-      ${fila('Pagado hasta hoy (seña y cuotas)', money(pagado))}
-      ${fila('Pendiente de pago', money(pendiente))}
-    </tbody>
-  </table>
+  ${cliente}
+  <h2>Evento</h2>
+  <table><tbody>
+    ${fila('Tipo de evento', escapar(d.tipo || '-'))}
+    ${fila('Fecha', d.fecha ? escapar(diaFecha(d.fecha)) : 'Sin fecha')}
+    ${fila('Horario', escapar(horario))}
+    ${fila('Invitados', escapar(invitados))}
+  </tbody></table>
+  <h2>Adicionales</h2>
+  ${adicionales.length ? `<ul>${adicionales.map(a => `<li>${escapar(a)}</li>`).join('')}</ul>` : '<p>Ninguno</p>'}
+  <h2>Valores</h2>
+  <table><tbody>
+    ${fila('Valor total', money(valor))}
+    ${fila('Seña (al firmar)', money(sena))}
+    ${fila('Saldo a pagar en cuotas mensuales', money(saldo))}
+  </tbody></table>
+  <h2>Cuotas mensuales</h2>
+  ${cuotas}
+  ${aviso}
+  ${resumen}
   <p class="nota">Este presupuesto resume las condiciones del evento. El contrato firmado rige la relación entre las partes.</p>`;
+}
+
+// Presupuesto de un evento cargado: se arma con sus datos y el estado de cada cuota
+function presupuestoEventoHtml(e) {
+  const sena = Number(e.sena || 0);
+  const pagado = sena + e.cuotas.filter(c => c.pagada).reduce((s, c) => s + Number(c.monto), 0);
+  return renderPresupuesto({
+    numero: `EVT-${String(e.id).padStart(4, '0')}`,
+    cliente: { nombre: e.cliente_nombre, dni: e.dni, mail: e.cliente_mail },
+    datos: e,
+    cuotas: e.cuotas.map(c => ({
+      numero: c.numero, mes: c.mes, monto: c.monto,
+      estado: c.pagada ? `Pagada el ${fechaLarga(c.fecha_pago)} ${(c.fecha_pago || '').slice(11, 16)} hs` : 'Pendiente'
+    })),
+    resumen: { pagado, pendiente: Number(e.valor_final || 0) - pagado }
+  });
+}
+
+// Nombre del día con la fecha: "Sábado 8 de mayo de 2027"
+function diaFecha(iso) {
+  const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return `${DIAS[dt.getUTCDay()]} ${d} de ${MESES[m - 1]} de ${y}`;
 }
 
 const ESTILOS = `
@@ -174,11 +216,12 @@ function pagina(titulo, cuerpo) {
 
 function enviarDocumento(res, evento, tipo) {
   const titulo = tipo === 'contrato' ? 'Contrato' : 'Presupuesto';
-  const cuerpo = tipo === 'contrato' ? contratoHtml(evento) : presupuestoHtml(evento);
+  const cuerpo = tipo === 'contrato' ? contratoHtml(evento) : presupuestoEventoHtml(evento);
   res.type('html').send(pagina(`${titulo} · ${evento.tipo} ${fechaLarga(evento.fecha)}`, cuerpo));
 }
 
 module.exports = function registrarDocumentos(app) {
+  // (las rutas de documentos de eventos)
   // Cliente: solo sus eventos
   for (const tipo of ['contrato', 'presupuesto']) {
     app.get(`/api/mis-eventos/:id/${tipo}`, auth.exigir('cliente'), (req, res) => {
@@ -194,3 +237,7 @@ module.exports = function registrarDocumentos(app) {
     });
   }
 };
+
+module.exports.pagina = pagina;
+module.exports.renderPresupuesto = renderPresupuesto;
+module.exports.diaFecha = diaFecha;

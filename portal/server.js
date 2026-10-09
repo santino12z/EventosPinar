@@ -219,6 +219,7 @@ require('./pagos')(app);
 const whatsapp = require('./whatsapp');
 const { ADICIONALES, horaValida, minutosEntre } = require('./eventos-datos');
 require('./documentos')(app);
+require('./presupuestos')(app, { tipoValido });
 
 // Buscador de clientes (todos, o filtrados por nombre, DNI, mail o teléfono)
 app.get('/api/admin/clientes', auth.exigir('admin'), (req, res) => {
