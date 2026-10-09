@@ -18,7 +18,9 @@ if (!ADMIN_PASSWORD) {
 const app = express();
 app.set('trust proxy', true);
 app.use(express.json({ limit: '100kb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: res => res.setHeader('Cache-Control', 'no-cache')
+}));
 app.get(['/', '/index.html'], (req, res) => res.redirect('/ingreso.html'));
 
 // ---------- Utilidades ----------

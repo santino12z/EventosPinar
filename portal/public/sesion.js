@@ -12,7 +12,7 @@
     const url = typeof input === 'string' ? input : input.url;
     if (window.portalToken && url.startsWith('/api/')) {
       const headers = new Headers(init.headers || {});
-      if (!headers.has('Authorization')) headers.set('Authorization', 'Bearer ' + window.portalToken);
+      headers.set('X-Portal-Token', window.portalToken);
       init = { ...init, headers };
     }
     return originalFetch(input, init).then(async res => {

@@ -41,6 +41,8 @@ function borrarSesion(token) {
 // Token: primero el encabezado Authorization (respaldo si el navegador bloquea cookies),
 // y si no hay, la cookie sid.
 function leerToken(req) {
+  const personalizado = req.headers['x-portal-token'];
+  if (personalizado) return String(personalizado).trim();
   const h = req.headers.authorization || '';
   if (h.startsWith('Bearer ')) return h.slice(7).trim();
   return leerCookie(req, 'sid');
@@ -57,7 +59,7 @@ function exigir(rol) {
   return (req, res, next) => {
     const token = leerToken(req);
     const sesion = leerSesion(token);
-    console.log(`[sesion] ${req.method} ${req.originalUrl} rol=${rol} auth=${req.headers.authorization ? 'si' : 'no'} cookie=${req.headers.cookie ? 'si' : 'no'} token=${token ? token.slice(0, 6) : '-'} -> ${sesion && sesion.rol === rol ? 'OK' : 'NO'}`);
+    console.log(`[sesion] ${req.method} ${req.originalUrl} rol=${rol} auth=${req.headers.authorization ? 'si' : 'no'} xtoken=${req.headers['x-portal-token'] ? 'si' : 'no'} cookie=${req.headers.cookie ? 'si' : 'no'} token=${token ? token.slice(0, 6) : '-'} -> ${sesion && sesion.rol === rol ? 'OK' : 'NO'}`);
     if (!sesion || sesion.rol !== rol) {
       return res.status(401).json({ error: 'No autorizado' });
     }
