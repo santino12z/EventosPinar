@@ -17,7 +17,7 @@ async function post(url, datos) {
 }
 
 function formDatos(form) {
-  return Object.fromEntries(new FormData(form).entries());
+  return Object.fromEntries([...new FormData(form).entries()].map(([k, v]) => [k, String(v).trim()]));
 }
 
 $('#tabLogin').onclick = () => cambiar('login');

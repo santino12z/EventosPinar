@@ -56,21 +56,20 @@ function exigir(rol) {
   };
 }
 
-// Si la conexión es HTTPS (directa o detrás de un proxy), la cookie se envía
-// como SameSite=None; Secure para que funcione también cuando el portal se
-// muestra dentro de otro sitio (por ejemplo, en una vista previa embebida).
-function atributosCookie(req) {
-  const seguro = !!req && (req.secure || (req.headers['x-forwarded-proto'] || '').split(',')[0].trim() === 'https');
-  return seguro ? 'SameSite=None; Secure' : 'SameSite=Lax';
+// La cookie se envía como SameSite=None; Secure para que el navegador la acepte
+// cuando el portal se muestra dentro de otro sitio (vista previa embebida).
+// Requiere HTTPS, salvo en localhost, donde los navegadores también la aceptan.
+function atributosCookie() {
+  return 'SameSite=None; Secure';
 }
 
 function setCookie(res, token, req) {
   res.setHeader('Set-Cookie',
-    `sid=${encodeURIComponent(token)}; HttpOnly; ${atributosCookie(req)}; Path=/; Max-Age=${DURACION_MS / 1000}`);
+    `sid=${encodeURIComponent(token)}; HttpOnly; ${atributosCookie()}; Path=/; Max-Age=${DURACION_MS / 1000}`);
 }
 
 function clearCookie(res, req) {
-  res.setHeader('Set-Cookie', `sid=; HttpOnly; ${atributosCookie(req)}; Path=/; Max-Age=0`);
+  res.setHeader('Set-Cookie', `sid=; HttpOnly; ${atributosCookie()}; Path=/; Max-Age=0`);
 }
 
 module.exports = {

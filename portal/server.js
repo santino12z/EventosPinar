@@ -71,7 +71,7 @@ app.post('/api/registro', (req, res) => {
 
 app.post('/api/login', (req, res) => {
   const { dni, password } = req.body || {};
-  const cliente = db.prepare('SELECT * FROM clientes WHERE dni = ?').get(String(dni || ''));
+  const cliente = db.prepare('SELECT * FROM clientes WHERE dni = ?').get(String(dni || '').trim());
   if (!cliente || !auth.verifyPassword(String(password || ''), cliente.password_hash)) {
     return res.status(401).json({ error: 'DNI o contraseña incorrectos' });
   }
