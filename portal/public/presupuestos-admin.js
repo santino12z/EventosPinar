@@ -37,8 +37,18 @@ function crearSelectorAdicionales(contenedor, opciones) {
     panel.append(el('label', 'sel-opcion', cb, txt('span', `${ICONOS_ADICIONALES[nombre] || '•'}  ${nombre}`)));
   });
 
+  const cerrar = () => panel.classList.add('oculto');
   disparador.onclick = e => { e.stopPropagation(); panel.classList.toggle('oculto'); };
-  document.addEventListener('click', e => { if (!contenedor.contains(e.target)) panel.classList.add('oculto'); });
+  const btnQuitar = txt('button', 'Quitar todos', 'sel-accion');
+  btnQuitar.type = 'button';
+  btnQuitar.onclick = e => { e.preventDefault(); elegidos = []; pintar(); };
+  const btnListo = txt('button', 'Listo', 'sel-accion sel-listo');
+  btnListo.type = 'button';
+  btnListo.onclick = e => { e.preventDefault(); cerrar(); };
+  panel.append(el('div', 'sel-pie', btnQuitar, btnListo));
+  // Cierra al tocar fuera o con Escape (un solo listener por selector, sin acumular)
+  document.addEventListener('click', e => { if (!contenedor.contains(e.target)) cerrar(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
 
   contenedor.replaceChildren(el('div', 'sel-caja', disparador, panel), resumen);
   pintar();
