@@ -53,15 +53,15 @@ main.admin-main { max-width: 1400px; }
 .cal-leyenda { font-size:.9rem; color:#555; }
 .cal-dot { display:inline-block; width:14px; height:14px; border-radius:3px; vertical-align:middle; border:1px solid #999; }
 .cal-dot.libre { background:#fff; }
-.cal-dot.ocupada { background:#f6e3e8; border-color:#1f4d2b; }
+.cal-dot.ocupada { background:#e8c97a; border-color:#1f4d2b; }
 .cal-grid { display:grid; grid-template-columns: repeat(7, minmax(0,1fr)); border:1px solid #9a9a9a; background:#fff; }
 .cal-cabecera { background:#4a4a4a; color:#fff; text-align:center; font-size:.95rem; letter-spacing:.08em; padding:10px 0; font-weight:600; }
 .cal-dia { min-height:120px; border-top:1px solid #b5b5b5; border-left:1px solid #b5b5b5; padding:6px 8px; cursor:pointer; position:relative; overflow:hidden; background:#fff; }
 .cal-dia:nth-child(7n+1) { border-left:none; }
 .cal-dia.vacio { cursor:default; background:#fafafa; }
-.cal-dia.ocupada { background:#fdf3f6; }
+.cal-dia.ocupada { background:#faf8f2; }
 .cal-dia:not(.vacio):hover { background:#f4f4f4; }
-.cal-dia.ocupada:not(.vacio):hover { background:#fbe5ec; }
+.cal-dia.ocupada:not(.vacio):hover { background:#eef5ec; }
 .cal-dia.hoy .cal-numero { background:#4a4a4a; color:#fff; border-radius:50%; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; }
 .cal-numero { font-size:1rem; font-weight:600; color:#333; display:inline-block; }
 .cal-chip { margin-top:6px; font-size:.78rem; line-height:1.25; color:#333; border-left:3px solid #1f4d2b; padding:2px 6px; background:rgba(255,255,255,.7); }
@@ -76,7 +76,7 @@ main.admin-main { max-width: 1400px; }
 .modal-contenido h3 { font-family: "Great Vibes", "Brush Script MT", cursive; font-weight:400; font-size:2.2rem; color:#333; margin:0 0 8px; }
 .modal-contenido .estado { display:inline-block; font-size:.8rem; font-weight:700; letter-spacing:.06em; padding:3px 10px; border-radius:12px; margin-bottom:12px; }
 .modal-contenido .estado.libre { background:#eef5ec; color:#2e7d32; }
-.modal-contenido .estado.ocupada { background:#fbe5ec; color:#1f4d2b; }
+.modal-contenido .estado.ocupada { background:#eef5ec; color:#1f4d2b; }
 @media (max-width: 900px) {
   .cal-titulo { font-size:2.4rem; min-width:220px; }
   .cal-dia { min-height:90px; padding:4px 5px; }
