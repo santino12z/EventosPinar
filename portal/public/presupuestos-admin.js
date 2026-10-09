@@ -14,7 +14,7 @@ function crearSelectorAdicionales(contenedor, opciones) {
   disparador.type = 'button';
   disparador.className = 'sel-disparador';
   const panel = el('div', 'sel-panel oculto');
-  const resumen = txt('small', '', 'sel-resumen');
+  const resumen = el('div', 'chips sel-resumen');
   const casillas = new Map();
 
   const pintar = () => {
@@ -24,7 +24,15 @@ function crearSelectorAdicionales(contenedor, opciones) {
       txt('span', '▼', 'sel-flecha')
     );
     casillas.forEach((cb, nombre) => { cb.checked = elegidos.includes(nombre); });
-    resumen.textContent = n ? elegidos.join(' · ') : 'Ningún adicional agregado';
+    resumen.replaceChildren();
+    if (!n) resumen.textContent = 'Ningún adicional agregado';
+    elegidos.forEach(nombre => {
+      const quitar = txt('button', `${ICONOS_ADICIONALES[nombre] || '•'} ${nombre}  ✕`, 'chip');
+      quitar.type = 'button';
+      quitar.title = 'Quitar';
+      quitar.onclick = e => { e.preventDefault(); elegidos = elegidos.filter(x => x !== nombre); pintar(); };
+      resumen.append(quitar);
+    });
   };
 
   opciones.forEach(nombre => {
@@ -38,7 +46,7 @@ function crearSelectorAdicionales(contenedor, opciones) {
   });
 
   const cerrar = () => panel.classList.add('oculto');
-  disparador.onclick = e => { e.stopPropagation(); panel.classList.toggle('oculto'); };
+  disparador.onclick = e => { e.stopPropagation(); panel.classList.toggle('oculto'); if (!panel.classList.contains('oculto')) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
   const btnQuitar = txt('button', 'Quitar todos', 'sel-accion');
   btnQuitar.type = 'button';
   btnQuitar.onclick = e => { e.preventDefault(); elegidos = []; pintar(); };
