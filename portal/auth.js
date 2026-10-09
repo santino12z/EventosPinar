@@ -38,6 +38,14 @@ function borrarSesion(token) {
   if (token) db.prepare('DELETE FROM sesiones WHERE token = ?').run(token);
 }
 
+// Token: primero el encabezado Authorization (respaldo si el navegador bloquea cookies),
+// y si no hay, la cookie sid.
+function leerToken(req) {
+  const h = req.headers.authorization || '';
+  if (h.startsWith('Bearer ')) return h.slice(7).trim();
+  return leerCookie(req, 'sid');
+}
+
 function leerCookie(req, nombre) {
   const cookies = (req.headers.cookie || '').split(';').map(c => c.trim());
   const found = cookies.find(c => c.startsWith(nombre + '='));
@@ -47,7 +55,7 @@ function leerCookie(req, nombre) {
 // Middleware: exige sesión del rol indicado
 function exigir(rol) {
   return (req, res, next) => {
-    const sesion = leerSesion(leerCookie(req, 'sid'));
+    const sesion = leerSesion(leerToken(req));
     if (!sesion || sesion.rol !== rol) {
       return res.status(401).json({ error: 'No autorizado' });
     }
@@ -74,5 +82,5 @@ function clearCookie(res, req) {
 
 module.exports = {
   hashPassword, verifyPassword, crearSesion, leerSesion, borrarSesion,
-  leerCookie, exigir, setCookie, clearCookie
+  leerCookie, leerToken, exigir, setCookie, clearCookie
 };
