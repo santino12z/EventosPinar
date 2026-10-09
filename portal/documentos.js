@@ -200,9 +200,9 @@ const ESTILOS = `
   p{margin:8px 0;text-align:justify} hr{border:0;border-top:1px solid #ccc;margin:18px 0}
   table{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}
   th,td{border:1px solid #ccc;padding:6px 8px;text-align:left;vertical-align:top}
-  th{background:#f5eef0} td.num{text-align:right;white-space:nowrap}
+  th{background:#e8f5e9} td.num{text-align:right;white-space:nowrap}
   .cabecera{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
-  .derecha{text-align:right} .bloque{background:#faf7f8;padding:10px 14px;border-radius:6px;margin-top:12px}
+  .derecha{text-align:right} .bloque{background:#f4faf4;padding:10px 14px;border-radius:6px;margin-top:12px}
   .falta{color:#b00020;background:#fdecef;padding:0 3px;border-radius:3px}
   .espacio{height:18px} .nota{font-size:12px;color:#666;margin-top:24px}
   @media print{ body{padding:0} .noimprimir{display:none} }`;
