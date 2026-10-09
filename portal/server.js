@@ -70,19 +70,18 @@ function eventosConCuotas(where = '', params = []) {
 
 // ---------- Cliente ----------
 app.post('/api/registro', (req, res) => {
-  const { nombre, dni, mail, password } = req.body || {};
+  const { nombre, dni, mail } = req.body || {};
   if (!nombre || String(nombre).trim().length < 3) return res.status(400).json({ error: 'Ingresá tu nombre completo' });
   if (!esDni(String(dni || ''))) return res.status(400).json({ error: 'El DNI debe tener 7 u 8 números' });
   if (!esMail(String(mail || ''))) return res.status(400).json({ error: 'Mail inválido' });
   const telefono = String(req.body.telefono || '').replace(/[\s+\-()]/g, '');
   if (!/^54\d{10,13}$/.test(telefono)) return res.status(400).json({ error: 'Teléfono inválido. Usá el formato 54 + código de área + número, por ejemplo 5491134334894' });
-  if (!password || String(password).length < 8) return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
 
   const existe = db.prepare('SELECT id FROM clientes WHERE dni = ? OR mail = ?').get(String(dni), String(mail).toLowerCase());
   if (existe) return res.status(409).json({ error: 'Ya existe una cuenta con ese DNI o mail' });
 
   db.prepare('INSERT INTO clientes (nombre, dni, mail, password_hash, telefono) VALUES (?, ?, ?, ?, ?)')
-    .run(String(nombre).trim(), String(dni), String(mail).toLowerCase(), auth.hashPassword(String(password)), telefono);
+    .run(String(nombre).trim(), String(dni), String(mail).toLowerCase(), auth.hashPassword(String(dni)), telefono);
 
   const token = auth.crearSesion('cliente', String(dni));
   auth.setCookie(res, token, req);
@@ -91,8 +90,9 @@ app.post('/api/registro', (req, res) => {
 
 app.post('/api/login', (req, res) => {
   const { dni, password } = req.body || {};
+  // Ingreso de clientes: usuario = DNI y contraseña = DNI
   const cliente = db.prepare('SELECT * FROM clientes WHERE dni = ?').get(String(dni || '').trim());
-  if (!cliente || !auth.verifyPassword(String(password || ''), cliente.password_hash)) {
+  if (!cliente || String(password || '').trim() !== cliente.dni) {
     return res.status(401).json({ error: 'DNI o contraseña incorrectos' });
   }
   const token = auth.crearSesion('cliente', cliente.dni);

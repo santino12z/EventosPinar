@@ -19,10 +19,11 @@
     </div>
 
     <form id="formLogin">
-      <label>DNI</label>
+      <label>Usuario (tu DNI)</label>
       <input name="dni" inputmode="numeric" required>
-      <label>Contraseña</label>
-      <input name="password" type="password" required>
+      <label>Contraseña (tu DNI)</label>
+      <input name="password" inputmode="numeric" required>
+      <small style="color:#777">Ingresá con tu DNI como usuario y como contraseña.</small>
       <button type="submit">Ingresar</button>
       <div class="msg" id="msgLogin"></div>
     </form>
@@ -37,8 +38,7 @@
       <label>Teléfono de WhatsApp (con código de país)</label>
       <input name="telefono" inputmode="tel" placeholder="5491134334894" required>
       <small style="color:#777">Formato: 54 + código de área + número, sin 0 ni 15. Ej: 5491134334894</small>
-      <label>Contraseña (mínimo 8 caracteres)</label>
-      <input name="password" type="password" minlength="8" required>
+      <small style="color:#777">Tu contraseña para ingresar es tu DNI.</small>
       <button type="submit">Crear cuenta</button>
       <div class="msg" id="msgRegistro"></div>
     </form>
