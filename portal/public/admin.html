@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administración - Eventos Pinar</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="portal.css">
 <script src="sesion.js?v=4"></script>
 </head>
 <body>
 <header>
-  <h1>Eventos Pinar · Administración <small style="font-weight:400;opacity:.8">(v6)</small></h1>
+  <h1>Eventos Pinar · Administración <small style="font-weight:400;opacity:.8">(v7)</small></h1>
   <button class="sec peq oculto" id="btnSalir" type="button">Salir</button>
 </header>
 <main class="admin-main">
@@ -26,22 +27,23 @@
 
   <div id="panelAdmin" class="oculto">
     <div class="card cal-card">
-      <div class="cal-cabecera-top">
-        <h2>Calendario de eventos</h2>
-        <div class="cal-controles">
-          <button class="sec" type="button" id="calAnterior" aria-label="Mes anterior">&larr; Anterior</button>
-          <button class="sec" type="button" id="calHoy">Hoy</button>
-          <strong id="calTitulo"></strong>
-          <button class="sec" type="button" id="calSiguiente" aria-label="Mes siguiente">Siguiente &rarr;</button>
-        </div>
+      <div class="cal-barra">
+        <button class="sec" type="button" id="calAnterior" aria-label="Mes anterior">&lsaquo;</button>
+        <h2 class="cal-titulo" id="calTitulo"></h2>
+        <button class="sec" type="button" id="calSiguiente" aria-label="Mes siguiente">&rsaquo;</button>
       </div>
-      <div class="cal-leyenda">
-        <span><span class="cal-dot libre"></span> Libre</span>
-        <span><span class="cal-dot ocupada"></span> Reservada</span>
-        <span><span class="cal-dot hoy-dot"></span> Hoy</span>
+      <div class="cal-subbarra">
+        <button class="sec peq" type="button" id="calHoy">Ir a hoy</button>
+        <span class="cal-leyenda"><span class="cal-dot libre"></span> Libre &nbsp; <span class="cal-dot ocupada"></span> Reservado</span>
       </div>
       <div class="cal-grid" id="calGrid"></div>
-      <div id="calDetalle" class="cal-detalle"></div>
+    </div>
+
+    <div class="modal oculto" id="modalDia" role="dialog" aria-modal="true">
+      <div class="modal-contenido">
+        <button class="modal-cerrar" type="button" id="modalCerrar" aria-label="Cerrar">&times;</button>
+        <div id="modalCuerpo"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -103,6 +105,6 @@
     </div>
   </div>
 </main>
-<script src="admin.js?v=6"></script>
+<script src="admin.js?v=7"></script>
 </body>
 </html>

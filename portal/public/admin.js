@@ -339,16 +339,19 @@ async function cargarEventos() {
 
 // ---------- Calendario ----------
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const DIAS_SEMANA = ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO'];
 let calAnio = new Date().getFullYear();
 let calMes = new Date().getMonth(); // 0-11
-let calSeleccion = null;
+
+const isoDia = (anio, mes, dia) => `${anio}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+const eventosDelDia = iso => eventosCache.filter(e => e.fecha.slice(0, 10) === iso);
 
 function renderCalendario() {
   const grid = $('#calGrid');
   grid.replaceChildren();
   $('#calTitulo').textContent = `${MESES[calMes]} ${calAnio}`;
 
-  ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].forEach(d => grid.append(txt('div', d, 'cal-cabecera')));
+  DIAS_SEMANA.forEach(d => grid.append(txt('div', d, 'cal-cabecera')));
 
   const primero = new Date(Date.UTC(calAnio, calMes, 1));
   const offset = (primero.getUTCDay() + 6) % 7; // lunes = 0
@@ -358,37 +361,32 @@ function renderCalendario() {
   for (let i = 0; i < offset; i++) grid.append(el('div', 'cal-dia vacio'));
 
   for (let dia = 1; dia <= diasMes; dia++) {
-    const iso = `${calAnio}-${String(calMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-    const ocupados = eventosCache.filter(e => e.fecha.slice(0, 10) === iso);
-    const celda = el('div', `cal-dia ${ocupados.length ? 'ocupada' : 'libre'}${iso === hoy ? ' hoy' : ''}${iso === calSeleccion ? ' seleccionado' : ''}`);
-    celda.append(el('div', 'cal-encabezado-dia',
-      txt('span', String(dia), 'cal-numero'),
-      ocupados.length ? txt('span', ocupados.length === 1 ? '1 evento' : `${ocupados.length} eventos`, 'cal-contador') : txt('span', 'Libre', 'cal-libre-txt')
-    ));
-    ocupados.slice(0, 3).forEach(e => {
-      const cliente = e.cliente_nombre || `DNI ${e.dni}`;
-      celda.append(el('div', 'cal-chip',
-        txt('strong', e.tipo),
-        txt('span', cliente)
-      ));
-    });
-    if (ocupados.length > 3) celda.append(txt('div', `+${ocupados.length - 3} más (ver detalle)`, 'cal-mas'));
-    celda.onclick = () => { calSeleccion = iso; renderCalendario(); mostrarDetalleDia(iso); };
+    const iso = isoDia(calAnio, calMes, dia);
+    const ocupados = eventosDelDia(iso);
+    const celda = el('div', `cal-dia ${ocupados.length ? 'ocupada' : 'libre'}${iso === hoy ? ' hoy' : ''}`);
+    celda.append(txt('span', String(dia), 'cal-numero'));
+    ocupados.slice(0, 2).forEach(e => celda.append(el('div', 'cal-chip',
+      txt('strong', e.tipo),
+      txt('span', e.cliente_nombre || `DNI ${e.dni}`)
+    )));
+    if (ocupados.length > 2) celda.append(txt('div', `+${ocupados.length - 2} más`, 'cal-mas'));
+    celda.onclick = () => abrirDia(iso);
     grid.append(celda);
-  }
-
-  if (calSeleccion && calSeleccion.startsWith(`${calAnio}-${String(calMes + 1).padStart(2, '0')}`)) {
-    mostrarDetalleDia(calSeleccion);
-  } else {
-    $('#calDetalle').replaceChildren(txt('p', 'Tocá un día del calendario para ver si está libre o reservado y los datos del evento.', 'cal-ayuda'));
   }
 }
 
-function mostrarDetalleDia(iso) {
-  const caja = $('#calDetalle');
-  const ocupados = eventosCache.filter(e => e.fecha.slice(0, 10) === iso);
+function cerrarModal() {
+  $('#modalDia').classList.add('oculto');
+}
+
+function abrirDia(iso) {
+  const caja = $('#modalCuerpo');
+  const ocupados = eventosDelDia(iso);
   const hoy = hoyISO();
-  const titulo = txt('h3', `${fechaLarga(iso)} · ${ocupados.length ? 'RESERVADA' : 'LIBRE'}`);
+  const fechaTexto = `${DIAS_SEMANA[(aDate(iso).getUTCDay() + 6) % 7]} ${Number(iso.slice(8, 10))} de ${MESES[Number(iso.slice(5, 7)) - 1]} de ${iso.slice(0, 4)}`;
+
+  const titulo = txt('h3', fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1));
+  $('#modalDia').classList.remove('oculto');
 
   if (!ocupados.length) {
     const botonCargar = txt('button', 'Cargar evento en esta fecha');
@@ -397,40 +395,46 @@ function mostrarDetalleDia(iso) {
       $('#fechaEvento').value = iso;
       avisoFecha();
       actualizarRecomendacion();
+      cerrarModal();
       $('#formEvento').scrollIntoView({ behavior: 'smooth' });
     };
-    caja.replaceChildren(titulo, txt('p', 'No hay eventos cargados para este día.'), botonCargar);
+    caja.replaceChildren(titulo, txt('span', 'LIBRE', 'estado libre'), txt('p', 'No hay eventos reservados para este día.'), botonCargar);
     return;
   }
 
-  caja.replaceChildren(titulo, ...ocupados.map(e => {
-    const saldo = e.cuotas.filter(c => !c.pagada).reduce((s, c) => s + c.monto, 0);
-    const pagado = e.cuotas.filter(c => c.pagada).reduce((s, c) => s + c.monto, 0) + Number(e.sena || 0);
-    const cuotas = e.cuotas.length
-      ? el('table', null,
-          el('thead', null, el('tr', null, ...['Cuota', 'Monto', 'Vence', 'Estado'].map(t => txt('th', t)))),
-          el('tbody', null, ...e.cuotas.map(c => el('tr', null,
-            txt('td', `#${c.numero}`),
-            txt('td', money(c.monto)),
-            txt('td', fechaLarga(c.vencimiento)),
-            txt('td', estadoCuotaAdmin(c, hoy))))))
-      : txt('p', 'Sin cuotas cargadas.');
-    return el('div', 'evento',
-      txt('h4', e.tipo),
-      el('div', 'grid',
-        el('div', 'dato', txt('small', 'Cliente'), txt('strong', e.cliente_nombre || 'Sin cuenta registrada')),
-        el('div', 'dato', txt('small', 'DNI'), txt('strong', e.dni)),
-        el('div', 'dato', txt('small', 'Mail'), txt('strong', e.cliente_mail || '-')),
-        el('div', 'dato', txt('small', 'Seña'), txt('strong', money(e.sena))),
-        el('div', 'dato', txt('small', 'Valor final'), txt('strong', money(e.valor_final))),
-        el('div', 'dato', txt('small', 'Pagado'), txt('strong', money(pagado))),
-        el('div', 'dato', txt('small', 'Saldo pendiente'), txt('strong', money(saldo)))
-      ),
-      el('p', null, txt('strong', 'Adicionales: '), document.createTextNode(e.adicionales || 'Ninguno')),
-      cuotas
-    );
-  }));
+  caja.replaceChildren(titulo, txt('span', ocupados.length === 1 ? 'RESERVADO' : `RESERVADO · ${ocupados.length} EVENTOS`, 'estado ocupada'),
+    ...ocupados.map(e => {
+      const saldo = e.cuotas.filter(c => !c.pagada).reduce((s, c) => s + c.monto, 0);
+      const pagado = e.cuotas.filter(c => c.pagada).reduce((s, c) => s + c.monto, 0) + Number(e.sena || 0);
+      const cuotas = e.cuotas.length
+        ? el('table', null,
+            el('thead', null, el('tr', null, ...['Cuota', 'Monto', 'Vence', 'Estado'].map(t => txt('th', t)))),
+            el('tbody', null, ...e.cuotas.map(c => el('tr', null,
+              txt('td', `#${c.numero}`),
+              txt('td', money(c.monto)),
+              txt('td', fechaLarga(c.vencimiento)),
+              txt('td', estadoCuotaAdmin(c, hoy))))))
+        : txt('p', 'Sin cuotas cargadas.');
+      return el('div', 'evento',
+        txt('h4', e.tipo),
+        el('div', 'grid',
+          el('div', 'dato', txt('small', 'Cliente'), txt('strong', e.cliente_nombre || 'Sin cuenta registrada')),
+          el('div', 'dato', txt('small', 'DNI'), txt('strong', e.dni)),
+          el('div', 'dato', txt('small', 'Mail'), txt('strong', e.cliente_mail || '-')),
+          el('div', 'dato', txt('small', 'Seña'), txt('strong', money(e.sena))),
+          el('div', 'dato', txt('small', 'Valor final'), txt('strong', money(e.valor_final))),
+          el('div', 'dato', txt('small', 'Pagado'), txt('strong', money(pagado))),
+          el('div', 'dato', txt('small', 'Saldo pendiente'), txt('strong', money(saldo)))
+        ),
+        el('p', null, txt('strong', 'Adicionales: '), document.createTextNode(e.adicionales || 'Ninguno')),
+        cuotas
+      );
+    }));
 }
+
+$('#modalCerrar').onclick = cerrarModal;
+$('#modalDia').onclick = ev => { if (ev.target.id === 'modalDia') cerrarModal(); };
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') cerrarModal(); });
 
 $('#calAnterior').onclick = () => {
   calMes--; if (calMes < 0) { calMes = 11; calAnio--; }
@@ -439,7 +443,6 @@ $('#calAnterior').onclick = () => {
 $('#calHoy').onclick = () => {
   const h = new Date();
   calAnio = h.getFullYear(); calMes = h.getMonth();
-  calSeleccion = hoyISO();
   renderCalendario();
 };
 $('#calSiguiente').onclick = () => {
