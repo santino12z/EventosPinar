@@ -46,7 +46,9 @@ function compararSecreto(a, b) {
 
 function eventosConCuotas(where = '', params = []) {
   const eventos = db.prepare(`SELECT * FROM eventos ${where} ORDER BY fecha DESC, id DESC`).all(...params);
-  const cuotasStmt = db.prepare('SELECT * FROM cuotas WHERE evento_id = ? ORDER BY numero');
+  const cuotasStmt = db.prepare(`SELECT c.*, p.estado AS pago_estado, p.motivo AS pago_motivo
+                                 FROM cuotas c LEFT JOIN pagos p ON p.id = c.pago_id
+                                 WHERE c.evento_id = ? ORDER BY c.numero`);
   return eventos.map(e => ({
     ...e,
     cuotas: cuotasStmt.all(e.id).map(c => ({ ...c, pagada: !!c.pagada }))
@@ -180,6 +182,8 @@ app.post('/api/admin/cuotas/:id/desmarcar', auth.exigir('admin'), (req, res) => 
   db.prepare('UPDATE cuotas SET pagada = 0, fecha_pago = NULL WHERE id = ?').run(Number(req.params.id));
   res.json({ ok: true });
 });
+
+require('./pagos')(app);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Portal de Eventos Pinar en http://0.0.0.0:${PORT}`);

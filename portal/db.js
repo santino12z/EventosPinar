@@ -39,6 +39,19 @@ CREATE TABLE IF NOT EXISTS cuotas (
   fecha_pago  TEXT                       -- YYYY-MM-DD HH:MM, cuando se registró el pago
 );
 
+CREATE TABLE IF NOT EXISTS pagos (
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  dni                 TEXT NOT NULL,
+  monto               REAL NOT NULL,
+  fecha_transferencia TEXT NOT NULL,      -- YYYY-MM-DD HH:MM informada por el cliente
+  comprobante         TEXT NOT NULL,      -- nombre del archivo en data/comprobantes
+  mime                TEXT NOT NULL,
+  estado              TEXT NOT NULL DEFAULT 'pendiente',  -- pendiente | aprobado | rechazado
+  motivo              TEXT,
+  creado_en           TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+  revisado_en         TEXT
+);
+
 CREATE TABLE IF NOT EXISTS sesiones (
   token      TEXT PRIMARY KEY,
   rol        TEXT NOT NULL,              -- 'cliente' | 'admin'
@@ -46,5 +59,11 @@ CREATE TABLE IF NOT EXISTS sesiones (
   expira     INTEGER NOT NULL            -- epoch ms
 );
 `);
+
+// Migración: columna pago_id en cuotas (para saber si una cuota está en revisión)
+const columnas = db.prepare('PRAGMA table_info(cuotas)').all().map(c => c.name);
+if (!columnas.includes('pago_id')) {
+  db.exec('ALTER TABLE cuotas ADD COLUMN pago_id INTEGER REFERENCES pagos(id)');
+}
 
 module.exports = db;

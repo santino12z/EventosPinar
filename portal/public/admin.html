@@ -26,6 +26,11 @@
 
   <div id="panelAdmin" class="oculto">
     <div class="card">
+      <h2>Pagos por confirmar</h2>
+      <div id="listaPagos"></div>
+    </div>
+
+    <div class="card">
       <h2>Nuevo evento</h2>
       <form id="formEvento">
         <div class="grid">
@@ -38,7 +43,22 @@
         <label>Adicionales</label>
         <textarea name="adicionales" rows="2"></textarea>
 
+        <h3>Generar cuotas automáticamente</h3>
+        <p style="margin:0 0 8px;font-size:.9rem;">Se reparte el saldo (valor final menos seña) entre las cuotas. Después podés editar cada una.</p>
+        <div class="grid">
+          <div><label>Cantidad de cuotas</label><input id="gCantidad" type="number" min="1" max="60" value="6"></div>
+          <div><label>Plan</label>
+            <select id="gPlan">
+              <option value="mensual">Mensual (una por mes)</option>
+              <option value="dos_por_mes">Hasta 2 por mes (días 1 y 15)</option>
+            </select>
+          </div>
+          <div><label>Primer vencimiento</label><input id="gPrimera" type="date"></div>
+        </div>
+        <button class="sec peq" type="button" id="btnGenerar">Generar cuotas</button>
+
         <h3>Cuotas</h3>
+        <p style="margin:0 0 8px;font-size:.9rem;">Los vencimientos tienen 5 días de tolerancia antes de figurar como vencidos.</p>
         <div id="listaCuotas"></div>
         <button class="sec peq" type="button" id="btnAgregarCuota">+ Agregar cuota</button>
         <div><button type="submit">Guardar evento</button></div>
@@ -52,6 +72,6 @@
     </div>
   </div>
 </main>
-<script src="admin.js"></script>
+<script src="admin.js?v=4"></script>
 </body>
 </html>
