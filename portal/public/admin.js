@@ -15,7 +15,8 @@ function txt(tag, texto, cls) {
 const money = n => '$ ' + Number(n || 0).toLocaleString('es-AR', { maximumFractionDigits: 2 });
 const fechaLarga = iso => iso ? iso.slice(0, 10).split('-').reverse().join('/') : '-';
 const hoyISO = () => new Date().toLocaleDateString('sv-SE');
-const TOLERANCIA_DIAS = 5;
+const MESES_NOMBRE = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const nombreMes = mes => { if (!mes) return '-'; const [a, m] = mes.split('-').map(Number); return `${MESES_NOMBRE[m - 1]} de ${a}`; };
 
 // Reglas de recomendación de cuotas (ajustables)
 const CUOTAS_OPCIONES = [1, 2, 3, 4, 6, 9, 12];
@@ -90,16 +91,16 @@ $('#tipoEvento').onchange = () => {
 };
 
 // ---------- Cuotas del formulario ----------
-function filaCuota(monto = '', vencimiento = '') {
+function filaCuota(monto = '', mes = '') {
   const fila = el('div', 'fila-form');
   fila.dataset.cuota = '1';
   fila.innerHTML = `
     <div><label>Monto ($)</label><input name="monto" type="number" min="0" step="0.01" required></div>
-    <div><label>Vence</label><input name="vencimiento" type="date" required></div>
+    <div><label>Mes de la cuota</label><input name="mes" type="month" required></div>
     <div></div>
     <div><button class="sec peq" type="button">Quitar</button></div>`;
   fila.querySelector('[name=monto]').value = monto;
-  fila.querySelector('[name=vencimiento]').value = vencimiento;
+  fila.querySelector('[name=mes]').value = mes;
   fila.querySelector('button').onclick = () => fila.remove();
   return fila;
 }
@@ -146,10 +147,10 @@ function actualizarRecomendacion() {
 
 function usarCuotas(n) {
   $('#gCantidad').value = n;
-  $('#gPlan').value = 'mensual';
   if (!$('#gPrimera').value) {
-    const d = new Date(Date.parse(hoyISO()) + 30 * 86400000);
-    $('#gPrimera').value = d.toISOString().slice(0, 10);
+    const h = new Date();
+    const siguiente = new Date(Date.UTC(h.getFullYear(), h.getMonth() + 1, 1));
+    $('#gPrimera').value = siguiente.toISOString().slice(0, 7);
   }
   $('#btnGenerar').click();
 }
@@ -157,32 +158,14 @@ function usarCuotas(n) {
 ['#valorFinal', '#sena', '#fechaEvento'].forEach(s => $(s).addEventListener('input', () => { actualizarRecomendacion(); avisoFecha(); }));
 
 // ---------- Generación automática de cuotas ----------
-// Fechas en UTC para no tener problemas de zona horaria
-const aDate = s => { const [y, m, d] = s.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
-const aISO = d => d.toISOString().slice(0, 10);
-
-function fechasMensuales(primera, n) {
-  const base = aDate(primera);
-  const dia = base.getUTCDate();
+// Meses consecutivos a partir de un mes AAAA-MM
+function mesesConsecutivos(primero, n) {
+  let [anio, mes] = primero.split('-').map(Number);
   const out = [];
   for (let i = 0; i < n; i++) {
-    const anio = base.getUTCFullYear();
-    const mes = base.getUTCMonth() + i;
-    const ultimoDia = new Date(Date.UTC(anio, mes + 1, 0)).getUTCDate();
-    out.push(aISO(new Date(Date.UTC(anio, mes, Math.min(dia, ultimoDia)))));
-  }
-  return out;
-}
-
-function fechasDosPorMes(primera, n) {
-  let d = aDate(primera);
-  const out = [aISO(d)];
-  for (let i = 1; i < n; i++) {
-    const anio = d.getUTCFullYear();
-    const mes = d.getUTCMonth();
-    // Si cae antes del 15, la siguiente es el 15 del mismo mes; si no, el 1 del mes siguiente
-    d = d.getUTCDate() < 15 ? new Date(Date.UTC(anio, mes, 15)) : new Date(Date.UTC(anio, mes + 1, 1));
-    out.push(aISO(d));
+    out.push(`${anio}-${String(mes).padStart(2, '0')}`);
+    mes++;
+    if (mes > 12) { mes = 1; anio++; }
   }
   return out;
 }
@@ -190,22 +173,21 @@ function fechasDosPorMes(primera, n) {
 $('#btnGenerar').onclick = () => {
   const form = $('#formEvento');
   const n = parseInt($('#gCantidad').value, 10);
-  const plan = $('#gPlan').value;
   const primera = $('#gPrimera').value;
   const valorFinal = Number(form.valor_final.value);
   const sena = Number(form.sena.value || 0);
 
   if (!n || n < 1 || n > 60) return mostrarMsgEvento('La cantidad de cuotas debe estar entre 1 y 60', 'error');
-  if (!primera) return mostrarMsgEvento('Indicá el primer vencimiento', 'error');
+  if (!primera) return mostrarMsgEvento('Indicá el primer mes de cuota', 'error');
   if (!form.valor_final.value) return mostrarMsgEvento('Indicá el valor final antes de generar las cuotas', 'error');
   const saldo = Math.round((valorFinal - sena) * 100) / 100;
   if (saldo <= 0) return mostrarMsgEvento('El saldo (valor final menos seña) debe ser mayor a cero', 'error');
 
   const base = Math.floor((saldo / n) * 100) / 100;
   const montos = Array.from({ length: n }, (_, i) => i < n - 1 ? base : Math.round((saldo - base * (n - 1)) * 100) / 100);
-  const fechas = plan === 'mensual' ? fechasMensuales(primera, n) : fechasDosPorMes(primera, n);
+  const meses = mesesConsecutivos(primera, n);
 
-  $('#listaCuotas').replaceChildren(...montos.map((m, i) => filaCuota(m.toFixed(2), fechas[i])));
+  $('#listaCuotas').replaceChildren(...montos.map((m, i) => filaCuota(m.toFixed(2), meses[i])));
   mostrarMsgEvento(`Se generaron ${n} cuotas por ${money(saldo)} en total. Revisá antes de guardar.`, 'ok');
 };
 
@@ -233,7 +215,7 @@ $('#formEvento').onsubmit = async e => {
   if (datos.tipo === 'Otro') datos.tipo = 'Otro: ' + $('#tipoOtro').value.trim();
   datos.cuotas = [...document.querySelectorAll('#listaCuotas [data-cuota]')].map(f => ({
     monto: f.querySelector('[name=monto]').value,
-    vencimiento: f.querySelector('[name=vencimiento]').value
+    mes: f.querySelector('[name=mes]').value
   }));
   try {
     await api('/api/admin/eventos', 'POST', datos);
@@ -272,22 +254,20 @@ async function eliminarEvento(id) {
 
 function alertar(err) { alert(err.message || 'Error'); }
 
-// Estado de una cuota para el administrador
+// Estado de una cuota mensual para el administrador
 function estadoCuotaAdmin(c, hoy) {
   if (c.pagada) return `Pagada el ${fechaLarga(c.fecha_pago)} ${(c.fecha_pago || '').slice(11, 16)} hs`;
   if (c.pago_estado === 'pendiente') return 'Comprobante en revisión';
-  const venc = c.vencimiento.slice(0, 10);
-  const limite = new Date(Date.parse(venc) + TOLERANCIA_DIAS * 86400000).toISOString().slice(0, 10);
-  if (hoy > limite) return `Vencida (venció el ${fechaLarga(venc)})`;
-  if (hoy > venc) return `En tolerancia (venció el ${fechaLarga(venc)}, hasta ${fechaLarga(limite)})`;
-  return `Pendiente (vence ${fechaLarga(venc)})`;
+  const cierre = c.vencimiento.slice(0, 10);
+  if (hoy > cierre) return `Atrasada (no se pagó durante ${nombreMes(c.mes)})`;
+  return `Pendiente (pagar durante ${nombreMes(c.mes)})`;
 }
 
 function tarjetaEvento(e) {
   const saldo = e.cuotas.filter(c => !c.pagada).reduce((s, c) => s + c.monto, 0);
   const tabla = el('table');
   tabla.append(el('thead', null, el('tr', null,
-    ...['Cuota', 'Monto', 'Vencimiento', 'Pago', ''].map(t => txt('th', t)))));
+    ...['Cuota', 'Mes', 'Monto', 'Pago', ''].map(t => txt('th', t)))));
   const tbody = el('tbody');
   e.cuotas.forEach(c => {
     const accion = el('td');
@@ -305,8 +285,8 @@ function tarjetaEvento(e) {
       : (c.pago_estado === 'pendiente' ? 'Comprobante en revisión' : 'Pendiente');
     tbody.append(el('tr', null,
       txt('td', `#${c.numero}`),
+      txt('td', nombreMes(c.mes)),
       txt('td', money(c.monto)),
-      txt('td', fechaLarga(c.vencimiento)),
       txt('td', estadoPago),
       accion
     ));
@@ -408,11 +388,11 @@ function abrirDia(iso) {
       const pagado = e.cuotas.filter(c => c.pagada).reduce((s, c) => s + c.monto, 0) + Number(e.sena || 0);
       const cuotas = e.cuotas.length
         ? el('table', null,
-            el('thead', null, el('tr', null, ...['Cuota', 'Monto', 'Vence', 'Estado'].map(t => txt('th', t)))),
+            el('thead', null, el('tr', null, ...['Cuota', 'Mes', 'Monto', 'Estado'].map(t => txt('th', t)))),
             el('tbody', null, ...e.cuotas.map(c => el('tr', null,
               txt('td', `#${c.numero}`),
+              txt('td', nombreMes(c.mes)),
               txt('td', money(c.monto)),
-              txt('td', fechaLarga(c.vencimiento)),
               txt('td', estadoCuotaAdmin(c, hoy))))))
         : txt('p', 'Sin cuotas cargadas.');
       return el('div', 'evento',
@@ -452,7 +432,7 @@ $('#calSiguiente').onclick = () => {
 
 // ---------- Pagos por confirmar ----------
 function tarjetaPago(p) {
-  const cuotasTxt = p.cuotas.map(c => `Cuota #${c.numero} (${c.tipo}, ${money(c.monto)})`).join(' · ') || 'Sin cuotas asociadas';
+  const cuotasTxt = p.cuotas.map(c => `Cuota #${c.numero} de ${nombreMes(c.mes)} (${c.tipo}, ${money(c.monto)})`).join(' · ') || 'Sin cuotas asociadas';
   const visor = el('div');
   const verBtn = txt('button', 'Ver comprobante', 'sec peq');
   verBtn.onclick = async () => {
@@ -503,8 +483,60 @@ async function cargarPagos() {
   pagos.forEach(p => lista.append(tarjetaPago(p)));
 }
 
+async function cargarMensajes() {
+  const mensajes = await api('/api/admin/mensajes');
+  const lista = $('#listaMensajes');
+  lista.replaceChildren();
+  if (!mensajes.length) { lista.append(txt('p', 'Todavía no se enviaron recordatorios.')); return; }
+  lista.append(el('table', null,
+    el('thead', null, el('tr', null, ...['Cliente', 'Mes', 'Monto', 'Estado', 'Detalle'].map(t => txt('th', t)))),
+    el('tbody', null, ...mensajes.map(m => el('tr', null,
+      txt('td', m.nombre || m.dni),
+      txt('td', nombreMes(m.mes)),
+      txt('td', money(m.monto)),
+      txt('td', m.estado === 'enviado' ? 'Enviado' : (m.estado === 'error' ? 'No enviado' : 'Pendiente')),
+      txt('td', m.estado === 'enviado' ? `Enviado ${m.enviado_en || ''}` : (m.error || '-'))
+    )))));
+}
+
+$('#btnRevisarAtrasos').onclick = async () => {
+  const msg = $('#msgAtrasos');
+  try {
+    const r = await api('/api/admin/atrasos/revisar', 'POST', {});
+    msg.textContent = `Cuotas atrasadas: ${r.atrasadas}. Nuevos avisos: ${r.nuevos}. Enviados ahora: ${r.enviados + (r.reintentos ? r.reintentos.enviados : 0)}.`;
+    msg.className = 'msg ok';
+    await cargarMensajes();
+  } catch (err) {
+    msg.textContent = err.message;
+    msg.className = 'msg error';
+  }
+};
+
+async function cargarSinTelefono() {
+  const clientes = await api('/api/admin/clientes-sin-telefono');
+  const lista = $('#listaSinTelefono');
+  lista.replaceChildren();
+  if (!clientes.length) { lista.append(txt('p', 'Todos los clientes tienen teléfono cargado.')); return; }
+  clientes.forEach(c => {
+    const input = Object.assign(document.createElement('input'), { placeholder: '5491134334894' });
+    const boton = txt('button', 'Guardar', 'peq');
+    boton.onclick = async () => {
+      try {
+        await api(`/api/admin/clientes/${c.dni}/telefono`, 'PUT', { telefono: input.value });
+        cargarSinTelefono();
+      } catch (err) { alertar(err); }
+    };
+    lista.append(el('div', 'fila-form',
+      el('div', null, txt('strong', c.nombre), txt('small', ` · DNI ${c.dni}`)),
+      el('div', null, input),
+      el('div', null),
+      el('div', null, boton)
+    ));
+  });
+}
+
 async function cargarTodo() {
-  await Promise.all([cargarPagos(), cargarEventos()]);
+  await Promise.all([cargarPagos(), cargarEventos(), cargarMensajes(), cargarSinTelefono()]);
 }
 
 async function iniciar() {

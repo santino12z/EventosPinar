@@ -34,6 +34,9 @@
       <input name="dni" inputmode="numeric" required>
       <label>Mail</label>
       <input name="mail" type="email" required>
+      <label>Teléfono de WhatsApp (con código de país)</label>
+      <input name="telefono" inputmode="tel" placeholder="5491134334894" required>
+      <small style="color:#777">Formato: 54 + código de área + número, sin 0 ni 15. Ej: 5491134334894</small>
       <label>Contraseña (mínimo 8 caracteres)</label>
       <input name="password" type="password" minlength="8" required>
       <button type="submit">Crear cuenta</button>
@@ -46,7 +49,7 @@
     <div id="contenido"></div>
   </div>
 </main>
-<script src="panel.js?v=5"></script>
+<script src="panel.js?v=6"></script>
 <script src="ingreso.js?v=4"></script>
 </body>
 </html>

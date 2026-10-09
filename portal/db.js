@@ -52,6 +52,20 @@ CREATE TABLE IF NOT EXISTS pagos (
   revisado_en         TEXT
 );
 
+CREATE TABLE IF NOT EXISTS mensajes (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  dni         TEXT NOT NULL,
+  cuota_id    INTEGER REFERENCES cuotas(id) ON DELETE CASCADE,
+  tipo        TEXT NOT NULL,            -- 'atraso'
+  telefono    TEXT,
+  texto       TEXT NOT NULL,
+  estado      TEXT NOT NULL DEFAULT 'pendiente',  -- pendiente | enviado | error
+  error       TEXT,
+  creado_en   TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+  enviado_en  TEXT,
+  UNIQUE (cuota_id, tipo)
+);
+
 CREATE TABLE IF NOT EXISTS sesiones (
   token      TEXT PRIMARY KEY,
   rol        TEXT NOT NULL,              -- 'cliente' | 'admin'
@@ -64,6 +78,16 @@ CREATE TABLE IF NOT EXISTS sesiones (
 const columnas = db.prepare('PRAGMA table_info(cuotas)').all().map(c => c.name);
 if (!columnas.includes('pago_id')) {
   db.exec('ALTER TABLE cuotas ADD COLUMN pago_id INTEGER REFERENCES pagos(id)');
+}
+
+if (!columnas.includes('mes')) {
+  db.exec('ALTER TABLE cuotas ADD COLUMN mes TEXT');
+  db.exec("UPDATE cuotas SET mes = substr(vencimiento, 1, 7) WHERE mes IS NULL");
+}
+
+const columnasClientes = db.prepare('PRAGMA table_info(clientes)').all().map(c => c.name);
+if (!columnasClientes.includes('telefono')) {
+  db.exec('ALTER TABLE clientes ADD COLUMN telefono TEXT');
 }
 
 module.exports = db;

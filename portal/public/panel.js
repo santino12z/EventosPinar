@@ -16,7 +16,12 @@ function txt(tag, texto, cls) {
 }
 
 const money = n => '$ ' + Number(n || 0).toLocaleString('es-AR', { maximumFractionDigits: 2 });
-const TOLERANCIA_DIAS = 5;
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+function nombreMes(mes) {
+  if (!mes) return '-';
+  const [anio, m] = mes.split('-').map(Number);
+  return `${MESES[m - 1]} de ${anio}`;
+}
 
 function fechaLarga(iso) {
   if (!iso) return '-';
@@ -31,8 +36,9 @@ function sumarDias(iso, dias) {
   return d.toISOString().slice(0, 10);
 }
 
-// Estado de una cuota para mostrar al cliente
+// Estado de una cuota mensual para mostrar al cliente
 function estadoCuota(c, hoy) {
+  const mes = nombreMes(c.mes);
   if (c.pagada) {
     const hora = (c.fecha_pago || '').slice(11, 16);
     return { texto: `Pagada el ${fechaLarga(c.fecha_pago)} a las ${hora} hs`, cls: 'pagada', etiqueta: 'Pagada' };
@@ -40,13 +46,11 @@ function estadoCuota(c, hoy) {
   if (c.pago_estado === 'pendiente') {
     return { texto: 'Comprobante enviado, esperando confirmación', cls: 'pendiente', etiqueta: 'En revisión' };
   }
-  const venc = c.vencimiento.slice(0, 10);
-  const limite = sumarDias(venc, TOLERANCIA_DIAS);
-  const dias = diasEntre(hoy, venc);
-  if (hoy > limite) return { texto: `Vencida el ${fechaLarga(venc)} (tolerancia hasta ${fechaLarga(limite)})`, cls: 'vencida', etiqueta: 'Vencida' };
-  if (dias < 0) return { texto: `Venció el ${fechaLarga(venc)}, tolerancia hasta ${fechaLarga(limite)}`, cls: 'vencida', etiqueta: 'En tolerancia' };
-  if (dias === 0) return { texto: `Vence hoy (${fechaLarga(venc)}), tolerancia hasta ${fechaLarga(limite)}`, cls: 'pendiente', etiqueta: 'Vence hoy' };
-  return { texto: `Vence el ${fechaLarga(venc)} (en ${dias} días)`, cls: 'pendiente', etiqueta: 'Pendiente' };
+  const cierre = c.vencimiento.slice(0, 10);
+  if (hoy > cierre) {
+    return { texto: `Atrasada: no se pagó durante ${mes}. Te vamos a recordar por WhatsApp.`, cls: 'vencida', etiqueta: 'Atrasada' };
+  }
+  return { texto: `Pagala durante ${mes} (hasta el ${fechaLarga(cierre)})`, cls: 'pendiente', etiqueta: 'Pendiente' };
 }
 
 function sePuedePagar(c) {
@@ -56,7 +60,7 @@ function sePuedePagar(c) {
 function tablaCuotas(evento, hoy, conSeleccion) {
   const cuotas = evento.cuotas;
   if (!cuotas.length) return txt('p', 'No hay cuotas cargadas para este evento.');
-  const encabezados = ['Cuota', 'Monto', 'Estado', 'Detalle'];
+  const encabezados = ['Cuota', 'Mes', 'Monto', 'Estado', 'Detalle'];
   if (conSeleccion) encabezados.unshift('');
   const thead = el('thead', null, el('tr', null, ...encabezados.map(t => txt('th', t))));
   const tbody = el('tbody');
@@ -64,6 +68,7 @@ function tablaCuotas(evento, hoy, conSeleccion) {
     const est = estadoCuota(c, hoy);
     const celdas = [
       txt('td', `#${c.numero}`),
+      txt('td', nombreMes(c.mes)),
       txt('td', money(c.monto)),
       el('td', null, txt('span', est.etiqueta, `badge ${est.cls}`)),
       txt('td', est.texto)

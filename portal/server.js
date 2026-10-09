@@ -39,6 +39,13 @@ const TIPOS_EVENTO = [
 ];
 const tipoValido = t => TIPOS_EVENTO.includes(t) || (t.startsWith('Otro: ') && t.length > 7 && t.length <= 120);
 
+// Último día del mes AAAA-MM: fecha límite para pagar la cuota de ese mes
+function ultimoDiaDelMes(mes) {
+  const [anio, m] = mes.split('-').map(Number);
+  const dia = new Date(Date.UTC(anio, m, 0)).getUTCDate();
+  return `${mes}-${String(dia).padStart(2, '0')}`;
+}
+
 const esFecha = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
 const esDni = s => /^\d{7,8}$/.test(s);
 const esMail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -67,13 +74,15 @@ app.post('/api/registro', (req, res) => {
   if (!nombre || String(nombre).trim().length < 3) return res.status(400).json({ error: 'Ingresá tu nombre completo' });
   if (!esDni(String(dni || ''))) return res.status(400).json({ error: 'El DNI debe tener 7 u 8 números' });
   if (!esMail(String(mail || ''))) return res.status(400).json({ error: 'Mail inválido' });
+  const telefono = String(req.body.telefono || '').replace(/[\s+\-()]/g, '');
+  if (!/^54\d{10,13}$/.test(telefono)) return res.status(400).json({ error: 'Teléfono inválido. Usá el formato 54 + código de área + número, por ejemplo 5491134334894' });
   if (!password || String(password).length < 8) return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres' });
 
   const existe = db.prepare('SELECT id FROM clientes WHERE dni = ? OR mail = ?').get(String(dni), String(mail).toLowerCase());
   if (existe) return res.status(409).json({ error: 'Ya existe una cuenta con ese DNI o mail' });
 
-  db.prepare('INSERT INTO clientes (nombre, dni, mail, password_hash) VALUES (?, ?, ?, ?)')
-    .run(String(nombre).trim(), String(dni), String(mail).toLowerCase(), auth.hashPassword(String(password)));
+  db.prepare('INSERT INTO clientes (nombre, dni, mail, password_hash, telefono) VALUES (?, ?, ?, ?, ?)')
+    .run(String(nombre).trim(), String(dni), String(mail).toLowerCase(), auth.hashPassword(String(password)), telefono);
 
   const token = auth.crearSesion('cliente', String(dni));
   auth.setCookie(res, token, req);
@@ -147,10 +156,13 @@ app.post('/api/admin/eventos', auth.exigir('admin'), (req, res) => {
   if (!tipoValido(tipo)) return res.status(400).json({ error: 'Elegí un tipo de evento de la lista' });
   if (!esFecha(b.fecha)) return res.status(400).json({ error: 'Fecha del evento inválida' });
   if (sena === null || valor === null) return res.status(400).json({ error: 'Seña y valor final deben ser números válidos' });
+  const cuotasNorm = [];
   for (const c of cuotas) {
-    if (numero(Number(c.monto)) === null || !esFecha(c.vencimiento)) {
-      return res.status(400).json({ error: 'Cada cuota necesita monto y fecha de vencimiento válidos' });
+    const mes = typeof c.mes === 'string' && /^\d{4}-\d{2}$/.test(c.mes) ? c.mes : null;
+    if (numero(Number(c.monto)) === null || !mes) {
+      return res.status(400).json({ error: 'Cada cuota necesita un monto y un mes (AAAA-MM)' });
     }
+    cuotasNorm.push({ monto: Number(c.monto), mes, vencimiento: ultimoDiaDelMes(mes) });
   }
 
   db.exec('BEGIN');
@@ -158,8 +170,8 @@ app.post('/api/admin/eventos', auth.exigir('admin'), (req, res) => {
     const r = db.prepare(`INSERT INTO eventos (dni, tipo, fecha, sena, adicionales, valor_final)
                           VALUES (?, ?, ?, ?, ?, ?)`)
       .run(dni, tipo, b.fecha, sena, String(b.adicionales || ''), valor);
-    const insCuota = db.prepare('INSERT INTO cuotas (evento_id, numero, monto, vencimiento) VALUES (?, ?, ?, ?)');
-    cuotas.forEach((c, i) => insCuota.run(r.lastInsertRowid, i + 1, Number(c.monto), c.vencimiento));
+        const insCuotaMes = db.prepare('INSERT INTO cuotas (evento_id, numero, monto, vencimiento, mes) VALUES (?, ?, ?, ?, ?)');
+    cuotasNorm.forEach((c, i) => insCuotaMes.run(r.lastInsertRowid, i + 1, c.monto, c.vencimiento, c.mes));
     db.exec('COMMIT');
     res.status(201).json({ ok: true, id: Number(r.lastInsertRowid) });
   } catch (err) {
@@ -193,6 +205,42 @@ app.post('/api/admin/cuotas/:id/desmarcar', auth.exigir('admin'), (req, res) => 
 });
 
 require('./pagos')(app);
+
+const whatsapp = require('./whatsapp');
+
+app.post('/api/admin/atrasos/revisar', auth.exigir('admin'), async (req, res) => {
+  const a = await whatsapp.revisarAtrasos();
+  const b = await whatsapp.reintentarPendientes();
+  res.json({ ok: true, ...a, reintentos: b });
+});
+
+app.get('/api/admin/mensajes', auth.exigir('admin'), (req, res) => {
+  res.json(db.prepare(`SELECT m.*, c.numero, c.mes, c.monto, cl.nombre
+                       FROM mensajes m
+                       LEFT JOIN cuotas c ON c.id = m.cuota_id
+                       LEFT JOIN clientes cl ON cl.dni = m.dni
+                       ORDER BY m.id DESC LIMIT 200`).all());
+});
+
+app.get('/api/admin/clientes-sin-telefono', auth.exigir('admin'), (req, res) => {
+  res.json(db.prepare("SELECT nombre, dni, mail FROM clientes WHERE telefono IS NULL OR telefono = '' ORDER BY nombre").all());
+});
+
+app.put('/api/admin/clientes/:dni/telefono', auth.exigir('admin'), (req, res) => {
+  const telefono = String((req.body || {}).telefono || '').replace(/[\s+\-()]/g, '');
+  if (!/^54\d{10,13}$/.test(telefono)) return res.status(400).json({ error: 'Teléfono inválido. Formato: 54 + código de área + número' });
+  const r = db.prepare('UPDATE clientes SET telefono = ? WHERE dni = ?').run(telefono, String(req.params.dni));
+  if (!r.changes) return res.status(404).json({ error: 'Cliente no encontrado' });
+  res.json({ ok: true });
+});
+
+// Revisión automática cada hora
+setTimeout(() => {
+  whatsapp.revisarAtrasos().catch(console.error);
+}, 5000);
+setInterval(() => {
+  whatsapp.revisarAtrasos().then(() => whatsapp.reintentarPendientes()).catch(console.error);
+}, 60 * 60 * 1000);
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Portal de Eventos Pinar en http://0.0.0.0:${PORT}`);

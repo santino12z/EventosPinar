@@ -94,7 +94,7 @@ module.exports = function registrarPagos(app) {
     const pagos = db.prepare(`SELECT p.*, c.nombre AS cliente_nombre
                               FROM pagos p LEFT JOIN clientes c ON c.dni = p.dni
                               ORDER BY p.estado = 'pendiente' DESC, p.id DESC LIMIT 200`).all();
-    const cuotasStmt = db.prepare(`SELECT c.id, c.numero, c.monto, c.vencimiento, e.tipo, e.fecha AS evento_fecha
+    const cuotasStmt = db.prepare(`SELECT c.id, c.numero, c.monto, c.vencimiento, c.mes, e.tipo, e.fecha AS evento_fecha
                                    FROM cuotas c JOIN eventos e ON e.id = c.evento_id
                                    WHERE c.pago_id = ? OR (c.pagada = 1 AND c.pago_id = ?) ORDER BY c.numero`);
     res.json(pagos.map(p => ({ ...p, cuotas: cuotasStmt.all(p.id, p.id) })));
