@@ -34,15 +34,15 @@ function cambiar(modo) {
 $('#formLogin').onsubmit = async e => {
   e.preventDefault();
   try {
-    await post('/api/login', formDatos(e.target));
-    location.href = 'panel.html';
+    const data = await post('/api/login', formDatos(e.target));
+    location.href = 'panel.html?t=' + encodeURIComponent(data.token);
   } catch (err) { mostrar('#msgLogin', err.message, 'error'); }
 };
 
 $('#formRegistro').onsubmit = async e => {
   e.preventDefault();
   try {
-    await post('/api/registro', formDatos(e.target));
-    location.href = 'panel.html';
+    const data = await post('/api/registro', formDatos(e.target));
+    location.href = 'panel.html?t=' + encodeURIComponent(data.token);
   } catch (err) { mostrar('#msgRegistro', err.message, 'error'); }
 };
