@@ -33,7 +33,7 @@ node -v   # debe mostrar v22 o superior
 ## 4. Descargar el portal
 ```bash
 cd /home/ubuntu
-git clone https://github.com/santino12z/EventosPinar.git
+git clone -b arena/f3996f79-eventospinar https://github.com/santino12z/EventosPinar.git
 cd EventosPinar/portal
 npm install --omit=dev
 ```
@@ -75,7 +75,7 @@ Caddy obtiene el certificado solo. Después, el portal queda en `https://TU-DOMI
 
 ## 8. Actualizar el portal cuando haya cambios
 ```bash
-cd /home/ubuntu/EventosPinar && git pull && cd portal && npm install --omit=dev
+cd /home/ubuntu/EventosPinar && git pull origin arena/f3996f79-eventospinar && cd portal && npm install --omit=dev
 sudo systemctl restart eventos-pinar
 ```
 
