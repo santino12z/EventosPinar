@@ -34,15 +34,22 @@ function cambiar(modo) {
 $('#formLogin').onsubmit = async e => {
   e.preventDefault();
   try {
-    const data = await post('/api/login', formDatos(e.target));
-    location.href = 'panel.html?t=' + encodeURIComponent(data.token);
+    await post('/api/login', formDatos(e.target));
+    await mostrarPanelCliente();
   } catch (err) { mostrar('#msgLogin', err.message, 'error'); }
 };
 
 $('#formRegistro').onsubmit = async e => {
   e.preventDefault();
   try {
-    const data = await post('/api/registro', formDatos(e.target));
-    location.href = 'panel.html?t=' + encodeURIComponent(data.token);
+    await post('/api/registro', formDatos(e.target));
+    await mostrarPanelCliente();
   } catch (err) { mostrar('#msgRegistro', err.message, 'error'); }
 };
+
+async function mostrarPanelCliente() {
+  const ok = await window.cargarPanel();
+  if (!ok) throw new Error('No se pudo abrir tu cuenta. Probá de nuevo.');
+  $('#cardIngreso').classList.add('oculto');
+  $('#panelCliente').classList.remove('oculto');
+}

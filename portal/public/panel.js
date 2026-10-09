@@ -80,9 +80,9 @@ function seccion(titulo, eventos, hoy, mensajeVacio) {
   return card;
 }
 
-async function cargar() {
+async function cargarPanel() {
   const meR = await fetch('/api/me', { credentials: 'same-origin' });
-  if (meR.status === 401) return location.replace('ingreso.html');
+  if (meR.status === 401) return false;
   const me = await meR.json();
 
   const evR = await fetch('/api/mis-eventos', { credentials: 'same-origin' });
@@ -96,14 +96,19 @@ async function cargar() {
     seccion('Próximos eventos', proximos, hoy, 'No tenés eventos próximos.'),
     seccion('Historial de eventos realizados', historial, hoy, 'Todavía no hay eventos realizados.')
   );
+  return true;
 }
+window.cargarPanel = cargarPanel;
 
 document.getElementById('btnSalir').onclick = async () => {
   await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' });
   location.replace('ingreso.html');
 };
 
-cargar().catch(err => {
-  bienvenida.replaceChildren(txt('p', 'No se pudo cargar tu cuenta. Probá ingresar de nuevo.'));
-  console.error(err);
-});
+// En panel.html se carga al abrir la página. En ingreso.html se carga después de ingresar.
+if (document.body.dataset.pagina === 'panel') {
+  cargarPanel().then(ok => { if (!ok) location.replace('ingreso.html'); }).catch(err => {
+    bienvenida.replaceChildren(txt('p', 'No se pudo cargar tu cuenta. Probá ingresar de nuevo.'));
+    console.error(err);
+  });
+}
