@@ -16,6 +16,7 @@ if (!ADMIN_PASSWORD) {
 }
 
 const app = express();
+app.set('trust proxy', true);
 app.use(express.json({ limit: '100kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => res.redirect('/ingreso.html'));
@@ -64,7 +65,7 @@ app.post('/api/registro', (req, res) => {
   db.prepare('INSERT INTO clientes (nombre, dni, mail, password_hash) VALUES (?, ?, ?, ?)')
     .run(String(nombre).trim(), String(dni), String(mail).toLowerCase(), auth.hashPassword(String(password)));
 
-  auth.setCookie(res, auth.crearSesion('cliente', String(dni)));
+  auth.setCookie(res, auth.crearSesion('cliente', String(dni)), req);
   res.status(201).json({ ok: true });
 });
 
@@ -74,13 +75,13 @@ app.post('/api/login', (req, res) => {
   if (!cliente || !auth.verifyPassword(String(password || ''), cliente.password_hash)) {
     return res.status(401).json({ error: 'DNI o contraseña incorrectos' });
   }
-  auth.setCookie(res, auth.crearSesion('cliente', cliente.dni));
+  auth.setCookie(res, auth.crearSesion('cliente', cliente.dni), req);
   res.json({ ok: true });
 });
 
 app.post('/api/logout', (req, res) => {
   auth.borrarSesion(auth.leerCookie(req, 'sid'));
-  auth.clearCookie(res);
+  auth.clearCookie(res, req);
   res.json({ ok: true });
 });
 
@@ -104,7 +105,7 @@ app.get('/api/mis-eventos', auth.exigir('cliente'), (req, res) => {
 app.post('/api/admin/login', (req, res) => {
   const pass = String((req.body || {}).password || '');
   if (!compararSecreto(pass, ADMIN_PASSWORD)) return res.status(401).json({ error: 'Contraseña incorrecta' });
-  auth.setCookie(res, auth.crearSesion('admin'));
+  auth.setCookie(res, auth.crearSesion('admin'), req);
   res.json({ ok: true });
 });
 
