@@ -1,0 +1,20 @@
+# Servicio systemd: mantiene el portal encendido y lo reinicia si se cae.
+# Copiar a /etc/systemd/system/eventos-pinar.service (ver DESPLIEGUE.md).
+[Unit]
+Description=Portal de clientes Eventos Pinar
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/EventosPinar/portal
+Environment=PORT=3000
+Environment=NODE_ENV=production
+EnvironmentFile=/home/ubuntu/eventos-pinar.env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

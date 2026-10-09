@@ -1,0 +1,4 @@
+# Caddy da HTTPS automático. Reemplazar TU-DOMINIO por el dominio o subdominio apuntado a la IP del servidor.
+TU-DOMINIO.duckdns.org {
+    reverse_proxy localhost:3000
+}
