@@ -348,7 +348,7 @@ function renderCalendario() {
   grid.replaceChildren();
   $('#calTitulo').textContent = `${MESES[calMes]} ${calAnio}`;
 
-  ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].forEach(d => grid.append(txt('div', d, 'cal-cabecera')));
+  ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].forEach(d => grid.append(txt('div', d, 'cal-cabecera')));
 
   const primero = new Date(Date.UTC(calAnio, calMes, 1));
   const offset = (primero.getUTCDay() + 6) % 7; // lunes = 0
@@ -361,13 +361,18 @@ function renderCalendario() {
     const iso = `${calAnio}-${String(calMes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
     const ocupados = eventosCache.filter(e => e.fecha.slice(0, 10) === iso);
     const celda = el('div', `cal-dia ${ocupados.length ? 'ocupada' : 'libre'}${iso === hoy ? ' hoy' : ''}${iso === calSeleccion ? ' seleccionado' : ''}`);
-    celda.append(txt('div', String(dia), 'cal-numero'));
-    if (ocupados.length) {
-      ocupados.slice(0, 2).forEach(e => celda.append(txt('div', e.tipo, 'cal-etiqueta')));
-      if (ocupados.length > 2) celda.append(txt('div', `+${ocupados.length - 2} más`, 'cal-etiqueta'));
-    } else {
-      celda.append(txt('div', 'Libre', 'cal-etiqueta libre-txt'));
-    }
+    celda.append(el('div', 'cal-encabezado-dia',
+      txt('span', String(dia), 'cal-numero'),
+      ocupados.length ? txt('span', ocupados.length === 1 ? '1 evento' : `${ocupados.length} eventos`, 'cal-contador') : txt('span', 'Libre', 'cal-libre-txt')
+    ));
+    ocupados.slice(0, 3).forEach(e => {
+      const cliente = e.cliente_nombre || `DNI ${e.dni}`;
+      celda.append(el('div', 'cal-chip',
+        txt('strong', e.tipo),
+        txt('span', cliente)
+      ));
+    });
+    if (ocupados.length > 3) celda.append(txt('div', `+${ocupados.length - 3} más (ver detalle)`, 'cal-mas'));
     celda.onclick = () => { calSeleccion = iso; renderCalendario(); mostrarDetalleDia(iso); };
     grid.append(celda);
   }
@@ -375,7 +380,7 @@ function renderCalendario() {
   if (calSeleccion && calSeleccion.startsWith(`${calAnio}-${String(calMes + 1).padStart(2, '0')}`)) {
     mostrarDetalleDia(calSeleccion);
   } else {
-    $('#calDetalle').replaceChildren(txt('p', 'Tocá un día para ver si está libre o reservado.', 'cal-ayuda'));
+    $('#calDetalle').replaceChildren(txt('p', 'Tocá un día del calendario para ver si está libre o reservado y los datos del evento.', 'cal-ayuda'));
   }
 }
 
@@ -429,6 +434,12 @@ function mostrarDetalleDia(iso) {
 
 $('#calAnterior').onclick = () => {
   calMes--; if (calMes < 0) { calMes = 11; calAnio--; }
+  renderCalendario();
+};
+$('#calHoy').onclick = () => {
+  const h = new Date();
+  calAnio = h.getFullYear(); calMes = h.getMonth();
+  calSeleccion = hoyISO();
   renderCalendario();
 };
 $('#calSiguiente').onclick = () => {

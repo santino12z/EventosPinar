@@ -10,10 +10,10 @@
 </head>
 <body>
 <header>
-  <h1>Eventos Pinar · Administración <small style="font-weight:400;opacity:.8">(v5)</small></h1>
+  <h1>Eventos Pinar · Administración <small style="font-weight:400;opacity:.8">(v6)</small></h1>
   <button class="sec peq oculto" id="btnSalir" type="button">Salir</button>
 </header>
-<main>
+<main class="admin-main">
   <div class="card" id="loginCard" style="max-width:420px;margin:0 auto;">
     <h2>Ingreso de administrador</h2>
     <form id="formLogin">
@@ -25,16 +25,20 @@
   </div>
 
   <div id="panelAdmin" class="oculto">
-    <div class="card">
-      <h2>Calendario</h2>
-      <div class="cal-nav">
-        <button class="sec peq" type="button" id="calAnterior">&larr;</button>
-        <strong id="calTitulo"></strong>
-        <button class="sec peq" type="button" id="calSiguiente">&rarr;</button>
+    <div class="card cal-card">
+      <div class="cal-cabecera-top">
+        <h2>Calendario de eventos</h2>
+        <div class="cal-controles">
+          <button class="sec" type="button" id="calAnterior" aria-label="Mes anterior">&larr; Anterior</button>
+          <button class="sec" type="button" id="calHoy">Hoy</button>
+          <strong id="calTitulo"></strong>
+          <button class="sec" type="button" id="calSiguiente" aria-label="Mes siguiente">Siguiente &rarr;</button>
+        </div>
       </div>
       <div class="cal-leyenda">
-        <span class="cal-dot libre"></span> Libre
-        <span class="cal-dot ocupada"></span> Reservada
+        <span><span class="cal-dot libre"></span> Libre</span>
+        <span><span class="cal-dot ocupada"></span> Reservada</span>
+        <span><span class="cal-dot hoy-dot"></span> Hoy</span>
       </div>
       <div class="cal-grid" id="calGrid"></div>
       <div id="calDetalle" class="cal-detalle"></div>
@@ -99,6 +103,6 @@
     </div>
   </div>
 </main>
-<script src="admin.js?v=5"></script>
+<script src="admin.js?v=6"></script>
 </body>
 </html>
