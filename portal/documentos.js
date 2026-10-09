@@ -8,6 +8,7 @@ const auth = require('./auth');
 const PLANTILLA = path.join(__dirname, 'contrato', 'CONTRATO_PLANTILLA.md');
 const DATOS = path.join(__dirname, 'contrato', 'datos_salon.json');
 const FALTA = '[completar]';
+const { duracionTexto } = require('./eventos-datos');
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 const money = n => '$ ' + Number(n || 0).toLocaleString('es-AR', { maximumFractionDigits: 2 });
@@ -49,8 +50,8 @@ function contratoHtml(e) {
     NOMBRE_SALON: salon('nombre_salon'),
     TIPO_EVENTO: e.tipo,
     FECHA_EVENTO: fechaLarga(e.fecha),
-    HORARIO_DESDE: salon('horario_desde'),
-    HORARIO_HASTA: salon('horario_hasta'),
+    HORARIO_DESDE: e.horario_inicio,
+    HORARIO_HASTA: e.horario_fin,
     ADICIONALES: e.adicionales || 'Ninguno',
     VALOR_FINAL: money(e.valor_final),
     SENA: money(sena),
@@ -130,6 +131,8 @@ function presupuestoHtml(e) {
   <h2>Detalle del valor</h2>
   <table>
     <tbody>
+      ${fila('Horario', e.horario_inicio && e.horario_fin ? `${e.horario_inicio} a ${e.horario_fin} (${duracionTexto(e.horario_inicio, e.horario_fin)})` : '-')}
+      ${fila('Invitados', e.adultos != null ? `${Number(e.adultos) + Number(e.ninos || 0)} (${e.adultos} adultos, ${e.ninos || 0} niños)` : '-')}
       ${fila('Valor total del evento', money(e.valor_final))}
       ${fila('Seña (al firmar)', money(sena))}
       ${fila('Saldo a pagar en cuotas mensuales', money(saldo))}

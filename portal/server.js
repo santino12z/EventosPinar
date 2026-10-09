@@ -132,6 +132,7 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 app.get('/api/admin/tipos-evento', auth.exigir('admin'), (req, res) => res.json(TIPOS_EVENTO));
+app.get('/api/admin/adicionales', auth.exigir('admin'), (req, res) => res.json(ADICIONALES));
 
 app.get('/api/admin/sesion', auth.exigir('admin'), (req, res) => res.json({ ok: true }));
 
@@ -156,6 +157,14 @@ app.post('/api/admin/eventos', auth.exigir('admin'), (req, res) => {
   if (!tipoValido(tipo)) return res.status(400).json({ error: 'Elegí un tipo de evento de la lista' });
   if (!esFecha(b.fecha)) return res.status(400).json({ error: 'Fecha del evento inválida' });
   if (sena === null || valor === null) return res.status(400).json({ error: 'Seña y valor final deben ser números válidos' });
+  if (!horaValida(b.horario_inicio) || !horaValida(b.horario_fin)) return res.status(400).json({ error: 'El horario debe ser en punto o y media (ej: 20:00 o 20:30)' });
+  if (minutosEntre(b.horario_inicio, b.horario_fin) === 0) return res.status(400).json({ error: 'El horario de inicio y fin no pueden ser iguales' });
+  const adultos = Number.isInteger(Number(b.adultos)) && Number(b.adultos) >= 0 ? Number(b.adultos) : null;
+  const ninos = Number.isInteger(Number(b.ninos)) && Number(b.ninos) >= 0 ? Number(b.ninos) : null;
+  if (adultos === null || ninos === null) return res.status(400).json({ error: 'Cantidad de adultos y niños inválida' });
+  const elegidos = Array.isArray(b.adicionales) ? b.adicionales : (b.adicionales ? [b.adicionales] : []);
+  if (!elegidos.every(a => ADICIONALES.includes(a))) return res.status(400).json({ error: 'Hay un adicional que no está en la lista' });
+  const adicionales = elegidos.join(', ');
   const cuotasNorm = [];
   for (const c of cuotas) {
     const mes = typeof c.mes === 'string' && /^\d{4}-\d{2}$/.test(c.mes) ? c.mes : null;
@@ -167,9 +176,10 @@ app.post('/api/admin/eventos', auth.exigir('admin'), (req, res) => {
 
   db.exec('BEGIN');
   try {
-    const r = db.prepare(`INSERT INTO eventos (dni, tipo, fecha, sena, adicionales, valor_final)
-                          VALUES (?, ?, ?, ?, ?, ?)`)
-      .run(dni, tipo, b.fecha, sena, String(b.adicionales || ''), valor);
+    const r = db.prepare(`INSERT INTO eventos (dni, tipo, fecha, sena, adicionales, valor_final,
+                                               horario_inicio, horario_fin, adultos, ninos)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .run(dni, tipo, b.fecha, sena, adicionales, valor, b.horario_inicio, b.horario_fin, adultos, ninos);
         const insCuotaMes = db.prepare('INSERT INTO cuotas (evento_id, numero, monto, vencimiento, mes) VALUES (?, ?, ?, ?, ?)');
     cuotasNorm.forEach((c, i) => insCuotaMes.run(r.lastInsertRowid, i + 1, c.monto, c.vencimiento, c.mes));
     db.exec('COMMIT');
@@ -207,6 +217,7 @@ app.post('/api/admin/cuotas/:id/desmarcar', auth.exigir('admin'), (req, res) => 
 require('./pagos')(app);
 
 const whatsapp = require('./whatsapp');
+const { ADICIONALES, horaValida, minutosEntre } = require('./eventos-datos');
 require('./documentos')(app);
 
 // Buscador de clientes (todos, o filtrados por nombre, DNI, mail o teléfono)

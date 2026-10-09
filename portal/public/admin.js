@@ -55,6 +55,75 @@ function mostrarPanel() {
   $('#btnSalir').classList.remove('oculto');
 }
 
+// ---------- Horario, día, invitados y adicionales ----------
+const DIAS_NOMBRE = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+// Opciones de hora: cada 30 minutos (00:00 a 23:30)
+function poblarHoras() {
+  for (const id of ['#horaInicio', '#horaFin']) {
+    const select = $(id);
+    select.replaceChildren(new Option('Seleccione...', ''));
+    for (let m = 0; m < 1440; m += 30) {
+      const v = `${String(Math.floor(m / 60)).padStart(2, '0')}:${m % 60 === 0 ? '00' : '30'}`;
+      select.append(new Option(v, v));
+    }
+  }
+}
+
+function minutosHora(v) { return Number(v.slice(0, 2)) * 60 + Number(v.slice(3, 5)); }
+
+function actualizarDuracion() {
+  const a = $('#horaInicio').value, b = $('#horaFin').value;
+  const aviso = $('#duracion');
+  if (!a || !b) { aviso.textContent = 'Elegí inicio y fin para ver cuánto dura el evento.'; return; }
+  if (a === b) { aviso.textContent = 'El inicio y el fin no pueden ser iguales.'; return; }
+  const m = (minutosHora(b) - minutosHora(a) + 1440) % 1440;
+  const h = Math.floor(m / 60), mm = m % 60;
+  const partes = [h ? `${h} hora${h === 1 ? '' : 's'}` : '', mm ? `${mm} minutos` : ''].filter(Boolean).join(' y ');
+  const cruza = minutosHora(b) < minutosHora(a) ? ' (termina al día siguiente)' : '';
+  aviso.textContent = `Dura ${partes}${cruza}.`;
+}
+
+function actualizarDia() {
+  const f = $('#fechaEvento').value;
+  if (!f) { $('#diaSemana').textContent = ''; return; }
+  const d = aDate(f);
+  $('#diaSemana').textContent = `${DIAS_NOMBRE[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES_NOMBRE[d.getUTCMonth()]} de ${d.getUTCFullYear()}`;
+}
+
+// Texto con horario, duración e invitados de un evento cargado
+function textoHorario(e) {
+  if (!e.horario_inicio || !e.horario_fin) return 'Sin horario cargado';
+  const m = (minutosHora(e.horario_fin) - minutosHora(e.horario_inicio) + 1440) % 1440;
+  const h = Math.floor(m / 60), mm = m % 60;
+  const dur = [h ? `${h} hora${h === 1 ? '' : 's'}` : '', mm ? `${mm} minutos` : ''].filter(Boolean).join(' y ');
+  return `${e.horario_inicio} a ${e.horario_fin} (${dur})`;
+}
+function textoInvitados(e) {
+  if (e.adultos == null) return 'Sin cargar';
+  const ninos = Number(e.ninos || 0);
+  return `${Number(e.adultos) + ninos} (${e.adultos} adultos, ${ninos} niños)`;
+}
+
+function actualizarInvitados() {
+  const total = (Number($('#adultos').value) || 0) + (Number($('#ninos').value) || 0);
+  $('#totalInvitados').value = total;
+}
+
+async function cargarAdicionales() {
+  const lista = await api('/api/admin/adicionales');
+  $('#listaAdicionales').replaceChildren(...lista.map(nombre => {
+    const cb = Object.assign(document.createElement('input'), { type: 'checkbox', name: 'adicionales', value: nombre });
+    return el('label', null, cb, document.createTextNode(nombre));
+  }));
+}
+
+function limpiarCamposEvento() {
+  actualizarDuracion();
+  actualizarDia();
+  actualizarInvitados();
+}
+
 // ---------- Navegación entre vistas ----------
 function irA(vista, opciones = {}) {
   document.querySelectorAll('.vista').forEach(v => v.classList.toggle('oculto', v.id !== 'vista-' + vista));
@@ -62,6 +131,7 @@ function irA(vista, opciones = {}) {
   if (vista === 'calendario') renderCalendario();
   if (vista === 'nuevo') {
     if (opciones.fecha) $('#fechaEvento').value = opciones.fecha;
+    actualizarDia();
     if (opciones.dni) { $('#dniEvento').value = opciones.dni; buscarDniEvento(); }
     avisoFecha();
     actualizarRecomendacion();
@@ -194,6 +264,11 @@ function usarCuotas(n) {
 }
 
 ['#valorFinal', '#sena', '#fechaEvento'].forEach(s => $(s).addEventListener('input', () => { actualizarRecomendacion(); avisoFecha(); }));
+$('#fechaEvento').addEventListener('input', actualizarDia);
+['#horaInicio', '#horaFin'].forEach(s => $(s).addEventListener('change', actualizarDuracion));
+['#adultos', '#ninos'].forEach(s => $(s).addEventListener('input', actualizarInvitados));
+poblarHoras();
+limpiarCamposEvento();
 
 // ---------- Generación automática de cuotas ----------
 // Meses consecutivos a partir de un mes AAAA-MM
@@ -251,6 +326,7 @@ $('#formEvento').onsubmit = async e => {
   const form = e.target;
   const datos = Object.fromEntries(new FormData(form).entries());
   if (datos.tipo === 'Otro') datos.tipo = 'Otro: ' + $('#tipoOtro').value.trim();
+  datos.adicionales = [...form.querySelectorAll('input[name=adicionales]:checked')].map(cb => cb.value);
   datos.cuotas = [...document.querySelectorAll('#listaCuotas [data-cuota]')].map(f => ({
     monto: f.querySelector('[name=monto]').value,
     mes: f.querySelector('[name=mes]').value
@@ -259,6 +335,7 @@ $('#formEvento').onsubmit = async e => {
     await api('/api/admin/eventos', 'POST', datos);
     mostrarMsgEvento('Evento guardado.', 'ok');
     form.reset();
+    limpiarCamposEvento();
     $('#tipoOtroWrap').classList.add('oculto');
     $('#listaCuotas').replaceChildren();
     actualizarRecomendacion();
@@ -338,6 +415,7 @@ function tarjetaEvento(e) {
     txt('h3', `${e.tipo} · ${fechaLarga(e.fecha)} · DNI ${e.dni}${e.cliente_nombre ? ' (' + e.cliente_nombre + ')' : ' (sin cuenta registrada)'}`),
     el('p', null,
       document.createTextNode(`Seña ${money(e.sena)} · Valor final ${money(e.valor_final)} · Saldo pendiente ${money(saldo)}`)),
+    el('p', null, txt('strong', 'Horario: '), document.createTextNode(textoHorario(e) + ' · Invitados: ' + textoInvitados(e))),
     el('p', null, txt('strong', 'Adicionales: '), document.createTextNode(e.adicionales || 'Ninguno')),
     tabla,
     borrar
@@ -434,6 +512,8 @@ function abrirDia(iso) {
           el('div', 'dato', txt('small', 'Cliente'), txt('strong', e.cliente_nombre || 'Sin cuenta registrada')),
           el('div', 'dato', txt('small', 'DNI'), txt('strong', e.dni)),
           el('div', 'dato', txt('small', 'WhatsApp'), txt('strong', e.cliente_telefono || '-')),
+          el('div', 'dato', txt('small', 'Horario'), txt('strong', textoHorario(e))),
+          el('div', 'dato', txt('small', 'Invitados'), txt('strong', textoInvitados(e))),
           el('div', 'dato', txt('small', 'Mail'), txt('strong', e.cliente_mail || '-')),
           el('div', 'dato', txt('small', 'Seña'), txt('strong', money(e.sena))),
           el('div', 'dato', txt('small', 'Valor final'), txt('strong', money(e.valor_final))),
@@ -610,6 +690,7 @@ async function cargarFicha(dni) {
     const saldo = e.cuotas.filter(c => !c.pagada).reduce((s, c) => s + c.monto, 0);
     ficha.append(el('div', 'card',
       txt('h3', `${e.tipo} · ${fechaLarga(e.fecha)}`),
+      txt('p', `Horario: ${textoHorario(e)} · Invitados: ${textoInvitados(e)}`),
       txt('p', `Seña ${money(e.sena)} · Valor final ${money(e.valor_final)} · Saldo pendiente ${money(saldo)}`),
       txt('p', `Adicionales: ${e.adicionales || 'Ninguno'}`),
       el('div', 'acciones-evento', botonDoc('Ver contrato', 'contrato'), botonDoc('Ver presupuesto', 'presupuesto')),
@@ -673,6 +754,7 @@ async function iniciar() {
   if (!$('#listaCuotas').children.length) $('#listaCuotas').append(filaCuota());
   try {
     await cargarTipos();
+    await cargarAdicionales();
     await cargarTodo();
     actualizarRecomendacion();
   } catch (err) { mostrarLogin(); }

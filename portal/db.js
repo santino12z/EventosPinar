@@ -90,4 +90,9 @@ if (!columnasClientes.includes('telefono')) {
   db.exec('ALTER TABLE clientes ADD COLUMN telefono TEXT');
 }
 
+const columnasEventos = db.prepare('PRAGMA table_info(eventos)').all().map(c => c.name);
+for (const [nombre, tipo] of [['horario_inicio', 'TEXT'], ['horario_fin', 'TEXT'], ['adultos', 'INTEGER'], ['ninos', 'INTEGER']]) {
+  if (!columnasEventos.includes(nombre)) db.exec(`ALTER TABLE eventos ADD COLUMN ${nombre} ${tipo}`);
+}
+
 module.exports = db;

@@ -174,6 +174,8 @@ function tarjetaEvento(e, hoy, conPago) {
   const hijos = [
     txt('h3', `${e.tipo} · ${fechaLarga(e.fecha)}`),
     el('div', 'grid',
+      dato('Horario', e.horario_inicio && e.horario_fin ? `${e.horario_inicio} a ${e.horario_fin}` : 'Sin cargar'),
+      dato('Invitados', e.adultos != null ? `${Number(e.adultos) + Number(e.ninos || 0)} (${e.adultos} adultos, ${e.ninos || 0} niños)` : 'Sin cargar'),
       dato('Seña', money(e.sena)),
       dato('Valor final', money(e.valor_final)),
       dato('Pagado (seña + cuotas)', money(pagado)),

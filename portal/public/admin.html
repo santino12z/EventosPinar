@@ -75,7 +75,7 @@
       <div class="vista-barra"><button class="sec peq" type="button" data-ir="inicio">&larr; Inicio</button><h2>Nuevo evento</h2></div>
       <div class="card">
         <form id="formEvento">
-          <h3>1. Cliente y evento</h3>
+          <h3>1. Cliente, fecha y horario</h3>
           <div class="grid">
             <div>
               <label>DNI del cliente</label>
@@ -88,24 +88,47 @@
                 <option value="">Seleccione...</option>
               </select>
             </div>
-            <div><label>Fecha del evento</label><input name="fecha" id="fechaEvento" type="date" required></div>
           </div>
           <div id="tipoOtroWrap" class="oculto" style="margin-top:8px;">
             <label>Especificá el tipo de evento</label>
             <input id="tipoOtro" maxlength="100" placeholder="Ej: Aniversario de bodas">
           </div>
+          <div class="grid" style="margin-top:8px;">
+            <div>
+              <label>Fecha del evento</label>
+              <input name="fecha" id="fechaEvento" type="date" required>
+              <div class="ayuda" id="diaSemana"></div>
+            </div>
+            <div>
+              <label>Hora de inicio</label>
+              <select name="horario_inicio" id="horaInicio" required></select>
+            </div>
+            <div>
+              <label>Hora de fin</label>
+              <select name="horario_fin" id="horaFin" required></select>
+              <div class="ayuda" id="duracion"></div>
+            </div>
+          </div>
           <div class="msg" id="avisoFecha"></div>
 
-          <h3>2. Valores</h3>
+          <h3>2. Invitados</h3>
+          <div class="grid">
+            <div><label>Cantidad de adultos</label><input name="adultos" id="adultos" type="number" min="0" step="1" value="0" required></div>
+            <div><label>Cantidad de niños</label><input name="ninos" id="ninos" type="number" min="0" step="1" value="0" required></div>
+            <div><label>Total de invitados</label><input id="totalInvitados" value="0" readonly></div>
+          </div>
+
+          <h3>3. Adicionales</h3>
+          <div id="listaAdicionales" class="lista-checks"></div>
+
+          <h3>4. Valores</h3>
           <div class="grid">
             <div><label>Seña ($)</label><input name="sena" id="sena" type="number" min="0" step="0.01" value="0" required></div>
             <div><label>Valor final ($)</label><input name="valor_final" id="valorFinal" type="number" min="0" step="0.01" required></div>
           </div>
-          <label>Adicionales</label>
-          <textarea name="adicionales" rows="2"></textarea>
           <div class="recomendacion" id="recomendacion"></div>
 
-          <h3>3. Cuotas mensuales</h3>
+          <h3>5. Cuotas mensuales</h3>
           <p class="ayuda">Cada cuota corresponde a un mes. El saldo (valor final menos seña) se reparte entre las cuotas. Después podés editar cada una.</p>
           <div class="grid">
             <div><label>Cantidad de cuotas</label><input id="gCantidad" type="number" min="1" max="60" value="6"></div>
@@ -163,6 +186,6 @@
   </div>
 </main>
 <script src="documentos-visor.js?v=1"></script>
-<script src="admin.js?v=10"></script>
+<script src="admin.js?v=11"></script>
 </body>
 </html>
