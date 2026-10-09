@@ -33,6 +33,12 @@ const ahoraLocal = () =>
 const hoyLocal = () =>
   new Intl.DateTimeFormat('sv-SE', { timeZone: TZ }).format(new Date());
 
+const TIPOS_EVENTO = [
+  'Baby Shower', 'Bautismo', 'Comunion', 'Primer Año', 'Evento Infantil (2 a 12 años)',
+  'Quince Años', '18 Años', 'Casamiento', 'Cumpleaños', 'Egresados', 'Otro'
+];
+const tipoValido = t => TIPOS_EVENTO.includes(t) || (t.startsWith('Otro: ') && t.length > 7 && t.length <= 120);
+
 const esFecha = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
 const esDni = s => /^\d{7,8}$/.test(s);
 const esMail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -116,13 +122,15 @@ app.post('/api/admin/login', (req, res) => {
   res.json({ ok: true, token });
 });
 
+app.get('/api/admin/tipos-evento', auth.exigir('admin'), (req, res) => res.json(TIPOS_EVENTO));
+
 app.get('/api/admin/sesion', auth.exigir('admin'), (req, res) => res.json({ ok: true }));
 
 app.get('/api/admin/eventos', auth.exigir('admin'), (req, res) => {
-  const nombreStmt = db.prepare('SELECT nombre FROM clientes WHERE dni = ?');
+  const nombreStmt = db.prepare('SELECT nombre, mail FROM clientes WHERE dni = ?');
   const eventos = eventosConCuotas().map(e => {
     const c = nombreStmt.get(e.dni);
-    return { ...e, cliente_nombre: c ? c.nombre : null };
+    return { ...e, cliente_nombre: c ? c.nombre : null, cliente_mail: c ? c.mail : null };
   });
   res.json(eventos);
 });
@@ -135,7 +143,8 @@ app.post('/api/admin/eventos', auth.exigir('admin'), (req, res) => {
   const cuotas = Array.isArray(b.cuotas) ? b.cuotas : [];
 
   if (!esDni(dni)) return res.status(400).json({ error: 'DNI inválido' });
-  if (!b.tipo || !String(b.tipo).trim()) return res.status(400).json({ error: 'Falta el tipo de evento' });
+  const tipo = String(b.tipo || '').trim();
+  if (!tipoValido(tipo)) return res.status(400).json({ error: 'Elegí un tipo de evento de la lista' });
   if (!esFecha(b.fecha)) return res.status(400).json({ error: 'Fecha del evento inválida' });
   if (sena === null || valor === null) return res.status(400).json({ error: 'Seña y valor final deben ser números válidos' });
   for (const c of cuotas) {
@@ -148,7 +157,7 @@ app.post('/api/admin/eventos', auth.exigir('admin'), (req, res) => {
   try {
     const r = db.prepare(`INSERT INTO eventos (dni, tipo, fecha, sena, adicionales, valor_final)
                           VALUES (?, ?, ?, ?, ?, ?)`)
-      .run(dni, String(b.tipo).trim(), b.fecha, sena, String(b.adicionales || ''), valor);
+      .run(dni, tipo, b.fecha, sena, String(b.adicionales || ''), valor);
     const insCuota = db.prepare('INSERT INTO cuotas (evento_id, numero, monto, vencimiento) VALUES (?, ?, ?, ?)');
     cuotas.forEach((c, i) => insCuota.run(r.lastInsertRowid, i + 1, Number(c.monto), c.vencimiento));
     db.exec('COMMIT');

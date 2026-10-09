@@ -10,7 +10,7 @@
 </head>
 <body>
 <header>
-  <h1>Eventos Pinar · Administración <small style="font-weight:400;opacity:.8">(v4)</small></h1>
+  <h1>Eventos Pinar · Administración <small style="font-weight:400;opacity:.8">(v5)</small></h1>
   <button class="sec peq oculto" id="btnSalir" type="button">Salir</button>
 </header>
 <main>
@@ -26,6 +26,21 @@
 
   <div id="panelAdmin" class="oculto">
     <div class="card">
+      <h2>Calendario</h2>
+      <div class="cal-nav">
+        <button class="sec peq" type="button" id="calAnterior">&larr;</button>
+        <strong id="calTitulo"></strong>
+        <button class="sec peq" type="button" id="calSiguiente">&rarr;</button>
+      </div>
+      <div class="cal-leyenda">
+        <span class="cal-dot libre"></span> Libre
+        <span class="cal-dot ocupada"></span> Reservada
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div id="calDetalle" class="cal-detalle"></div>
+    </div>
+
+    <div class="card">
       <h2>Pagos por confirmar</h2>
       <div id="listaPagos"></div>
     </div>
@@ -35,13 +50,25 @@
       <form id="formEvento">
         <div class="grid">
           <div><label>DNI del cliente</label><input name="dni" inputmode="numeric" required></div>
-          <div><label>Tipo de evento</label><input name="tipo" placeholder="Casamiento, Quince..." required></div>
-          <div><label>Fecha del evento</label><input name="fecha" type="date" required></div>
-          <div><label>Seña ($)</label><input name="sena" type="number" min="0" step="0.01" value="0" required></div>
-          <div><label>Valor final ($)</label><input name="valor_final" type="number" min="0" step="0.01" required></div>
+          <div>
+            <label>Tipo de evento</label>
+            <select name="tipo" id="tipoEvento" required>
+              <option value="">Seleccione...</option>
+            </select>
+          </div>
+          <div><label>Fecha del evento</label><input name="fecha" id="fechaEvento" type="date" required></div>
+          <div><label>Seña ($)</label><input name="sena" id="sena" type="number" min="0" step="0.01" value="0" required></div>
+          <div><label>Valor final ($)</label><input name="valor_final" id="valorFinal" type="number" min="0" step="0.01" required></div>
         </div>
+        <div id="tipoOtroWrap" class="oculto" style="margin-top:8px;">
+          <label>Especificá el tipo de evento</label>
+          <input id="tipoOtro" maxlength="100" placeholder="Ej: Aniversario de bodas">
+        </div>
+        <div class="msg" id="avisoFecha"></div>
         <label>Adicionales</label>
         <textarea name="adicionales" rows="2"></textarea>
+
+        <div class="recomendacion" id="recomendacion"></div>
 
         <h3>Generar cuotas automáticamente</h3>
         <p style="margin:0 0 8px;font-size:.9rem;">Se reparte el saldo (valor final menos seña) entre las cuotas. Después podés editar cada una.</p>
@@ -72,6 +99,6 @@
     </div>
   </div>
 </main>
-<script src="admin.js?v=4"></script>
+<script src="admin.js?v=5"></script>
 </body>
 </html>

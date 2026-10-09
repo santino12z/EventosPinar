@@ -34,3 +34,32 @@ th { color:#666; font-weight:600; }
 .evento { border:1px solid #eee; border-radius:8px; padding:16px; margin-bottom:16px; }
 .evento h3 { margin:0 0 6px; font-family: Montserrat, Arial, sans-serif; font-size:1.05rem; }
 .fila-form { display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap:8px; align-items:end; }
+
+/* Calendario del administrador */
+.cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.cal-nav strong { text-transform:capitalize; font-family: Montserrat, Arial, sans-serif; }
+.cal-leyenda { font-size:.85rem; margin-bottom:8px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.cal-dot { display:inline-block; width:12px; height:12px; border-radius:3px; margin-left:10px; }
+.cal-dot.libre { background:#e8f5e9; border:1px solid var(--verde); }
+.cal-dot.ocupada { background:#fde4ec; border:1px solid var(--rosa); }
+.cal-grid { display:grid; grid-template-columns: repeat(7, 1fr); gap:4px; }
+.cal-cabecera { text-align:center; font-size:.8rem; color:#777; padding:4px 0; font-weight:600; }
+.cal-dia { min-height:70px; border-radius:6px; padding:4px; border:1px solid #e5e5e5; cursor:pointer; overflow:hidden; font-size:.75rem; }
+.cal-dia.vacio { border:none; cursor:default; background:transparent; }
+.cal-dia.libre { background:#f3fbf4; }
+.cal-dia.ocupada { background:#fde4ec; border-color:#f3a6c0; }
+.cal-dia.hoy { outline:2px solid var(--amarillo); }
+.cal-dia.seleccionado { box-shadow: inset 0 0 0 2px var(--rosa); }
+.cal-numero { font-weight:700; margin-bottom:2px; }
+.cal-etiqueta { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#444; }
+.cal-etiqueta.libre-txt { color:var(--verde); }
+.cal-detalle { margin-top:16px; border-top:1px solid #eee; padding-top:12px; }
+.cal-detalle h3 { margin-top:0; }
+.cal-ayuda { color:#777; font-size:.9rem; }
+@media (max-width: 600px) { .cal-dia { min-height:48px; } .cal-etiqueta { display:none; } }
+
+/* Recomendación de cuotas */
+.recomendacion { margin-top:14px; background:#fff8e1; border-left:4px solid var(--amarillo); border-radius:6px; padding:10px 14px; }
+.recomendacion p { margin:6px 0; font-size:.9rem; }
+.rec-botones { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+.rec-botones button { margin-top:4px; }
