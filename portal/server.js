@@ -18,6 +18,7 @@ if (!ADMIN_PASSWORD) {
 const app = express();
 app.use(express.json({ limit: '100kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', (req, res) => res.redirect('/ingreso.html'));
 
 // ---------- Utilidades ----------
 const ahoraLocal = () =>
