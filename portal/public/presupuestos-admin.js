@@ -1,32 +1,46 @@
 // Administración: selector de adicionales, presupuestos (crear, numerar, editar, compartir).
 // Usa las funciones de admin.js (api, el, txt, $, filaCuota, mesesConsecutivos, aDate, etc.).
 
-// ---------- Selector de adicionales: menú desplegable + lista de lo elegido ----------
+// ---------- Selector de adicionales: cuadro desplegable con casillas ----------
+const ICONOS_ADICIONALES = {
+  'Fotógrafo': '📷', 'Disc Jockey': '🎧', 'Maquilladora': '💄', 'Maquillaje artístico': '🎨',
+  'Cabina fotográfica': '📸', 'Cabina 360°': '🎥', 'Robot': '🤖', 'Plaza blanda': '🧸',
+  'Glitter': '✨', 'Barra': '🍸', 'Catering': '🍽️', 'Menú Infantil': '🧒', 'Souvenirs (Velas)': '🕯️'
+};
+
 function crearSelectorAdicionales(contenedor, opciones) {
   let elegidos = [];
-  const select = document.createElement('select');
-  const chips = el('div', 'chips');
+  const disparador = document.createElement('button');
+  disparador.type = 'button';
+  disparador.className = 'sel-disparador';
+  const panel = el('div', 'sel-panel oculto');
+  const resumen = txt('small', '', 'sel-resumen');
+  const casillas = new Map();
 
   const pintar = () => {
-    chips.replaceChildren(...(elegidos.length
-      ? elegidos.map(nombre => {
-          const b = txt('button', `${nombre}  ✕`, 'chip');
-          b.type = 'button';
-          b.title = 'Quitar';
-          b.onclick = () => { elegidos = elegidos.filter(x => x !== nombre); pintar(); };
-          return b;
-        })
-      : [txt('span', 'Ningún adicional agregado', 'ayuda')]));
+    const n = elegidos.length;
+    disparador.replaceChildren(
+      txt('span', n ? `${n} adicional${n === 1 ? '' : 'es'}` : 'Seleccionar adicionales'),
+      txt('span', '▼', 'sel-flecha')
+    );
+    casillas.forEach((cb, nombre) => { cb.checked = elegidos.includes(nombre); });
+    resumen.textContent = n ? elegidos.join(' · ') : 'Ningún adicional agregado';
   };
 
-  select.replaceChildren(new Option('Agregar adicional...', ''), ...opciones.map(o => new Option(o, o)));
-  select.onchange = () => {
-    if (select.value && !elegidos.includes(select.value)) elegidos.push(select.value);
-    select.value = '';
-    pintar();
-  };
+  opciones.forEach(nombre => {
+    const cb = Object.assign(document.createElement('input'), { type: 'checkbox', value: nombre });
+    cb.onchange = () => {
+      elegidos = cb.checked ? [...elegidos, nombre] : elegidos.filter(x => x !== nombre);
+      pintar();
+    };
+    casillas.set(nombre, cb);
+    panel.append(el('label', 'sel-opcion', cb, txt('span', `${ICONOS_ADICIONALES[nombre] || '•'}  ${nombre}`)));
+  });
 
-  contenedor.replaceChildren(txt('small', 'Elegí del menú y se agrega a la lista. Para quitar uno, tocá su nombre.'), select, chips);
+  disparador.onclick = e => { e.stopPropagation(); panel.classList.toggle('oculto'); };
+  document.addEventListener('click', e => { if (!contenedor.contains(e.target)) panel.classList.add('oculto'); });
+
+  contenedor.replaceChildren(el('div', 'sel-caja', disparador, panel), resumen);
   pintar();
   return {
     valores: () => [...elegidos],
