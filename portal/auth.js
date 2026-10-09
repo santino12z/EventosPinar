@@ -55,7 +55,9 @@ function leerCookie(req, nombre) {
 // Middleware: exige sesión del rol indicado
 function exigir(rol) {
   return (req, res, next) => {
-    const sesion = leerSesion(leerToken(req));
+    const token = leerToken(req);
+    const sesion = leerSesion(token);
+    console.log(`[sesion] ${req.method} ${req.originalUrl} rol=${rol} auth=${req.headers.authorization ? 'si' : 'no'} cookie=${req.headers.cookie ? 'si' : 'no'} token=${token ? token.slice(0, 6) : '-'} -> ${sesion && sesion.rol === rol ? 'OK' : 'NO'}`);
     if (!sesion || sesion.rol !== rol) {
       return res.status(401).json({ error: 'No autorizado' });
     }
