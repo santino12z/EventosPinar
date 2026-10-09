@@ -1,0 +1,858 @@
+/* Estilos globales */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Montserrat', sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+
+.header-top {
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.logo {
+height: 180px;
+width: auto;
+margin: 0;
+}
+
+
+.titulo-opciones {
+  font-size: 2.5rem;
+  text-align: center;
+  margin: 10px 0;
+}
+
+/* Navegación */
+.opciones {
+  background-color: #0d500a;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+    width: 100%;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+}
+
+header {
+width: 100%;
+}
+.nav-links {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  color: white;
+  padding: 10px 15px;
+  margin: 0 5px;
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Main content */
+main {
+  flex: 1;
+  padding: 20px;
+  max-width: 100%;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* About section */
+#aboutSection {
+  background-color: #7c7c7c4f;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.about-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-text {
+  margin-bottom: 20px;
+}
+
+.about-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* Slideshow */
+.slideshow-container {
+  width: 100%;
+  height: 600px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.slideshow-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.slideshow-image.active {
+  opacity: 1;
+}
+
+/* Servicios */
+#serviciosSection {
+  margin-bottom: 40px;
+}
+
+.titulo-servicios-del-salon {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+#serviciosContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.card {
+  position: relative;
+  height: 500px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.03);
+}
+
+.card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.212));
+}
+
+.card-content button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  margin-bottom: 210px;
+}
+
+.card-content button:hover {
+  background-color: #3d8b40;
+}
+
+
+/* Formulario */
+#presupuestoSection {
+  background-color: #7c7c7c4f;
+  border-radius: 8px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px 20px;
+}
+
+.half-width {
+  flex: 0 0 calc(50% - 20px);
+  margin: 0 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 3px rgba(76, 175, 80, 0.5);
+}
+
+.error-message {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  align-self: flex-start;
+}
+
+button[type="submit"]:hover {
+  background-color: #3d8b40;
+}
+
+button[type="submit"]:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+/* ===================================================
+ SECCIÓN DE RESEÑAS
+ =================================================== */
+
+#reviewsSection {
+  background: #fff;
+  border-radius: 16px;
+  padding: 50px 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#reviewsSection h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+/* Header de reseñas con logo Google */
+.reviews-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.google-logo {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -2px;
+  margin-bottom: 10px;
+}
+
+.g-blue { color: #4285F4; }
+.g-red { color: #EA4335; }
+.g-yellow { color: #FBBC05; }
+.g-green { color: #34A853; }
+
+.reviews-average {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.stars-display {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.5rem;
+}
+
+.stars-display .full { color: #fbbc05; }
+.stars-display .half { color: #fbbc05; }
+.stars-display .empty { color: #ddd; }
+
+.avg-number {
+  margin-left: 10px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.average-text {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Carrusel de reseñas */
+.reviews-carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 50px;
+}
+
+.reviews-carousel {
+  display: flex;
+  gap: 20px;
+  overflow: hidden;
+  flex: 1;
+  transition: transform 0.5s ease;
+  padding: 10px 0;
+}
+
+.review-card {
+  flex: 0 0 calc(33.333% - 14px);
+  min-width: 280px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.review-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.review-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.review-meta {
+  flex: 1;
+}
+
+.review-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.review-date {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.review-google-icon {
+  color: #4285F4;
+  font-size: 1.2rem;
+}
+
+.review-stars {
+  color: #fbbc05;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 2px;
+}
+
+.review-stars .far {
+  color: #ddd;
+}
+
+.review-text {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+/* Flechas del carrusel */
+.carousel-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.carousel-arrow:hover {
+  background: #4CAF50;
+  color: #fff;
+  border-color: #4CAF50;
+}
+
+.carousel-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Formulario de reseña */
+.review-form-container {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 35px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.review-form-container h3 {
+  text-align: center;
+  font-size: 1.4rem;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+/* Sesión de usuario */
+.user-session-info {
+  margin-bottom: 20px;
+}
+
+.session-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #e8f5e9;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #2e7d32;
+}
+
+.session-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #4CAF50;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.session-logout {
+  margin-left: auto;
+  background: none;
+  border: 1px solid #4CAF50;
+  color: #4CAF50;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.session-logout:hover {
+  background: #4CAF50;
+  color: #fff;
+}
+
+.session-anon {
+  text-align: center;
+  background: #fff3e0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #e65100;
+}
+
+.session-login-btn {
+  margin-top: 8px;
+  background: #ff9800;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.3s ease;
+}
+
+.session-login-btn:hover {
+  background: #f57c00;
+}
+
+/* Rating con estrellas */
+.star-rating {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.star-rating .star {
+  font-size: 2rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.star-rating .star:hover,
+.star-rating .star.hover {
+  color: #fbbc05;
+  transform: scale(1.15);
+}
+
+.star-rating .star.active {
+  color: #fbbc05;
+}
+
+.rating-text {
+  display: block;
+  margin-top: 5px;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* ===================================================
+ FOOTER
+ =================================================== */
+
+.footer {
+width: 100%;
+background: #2b2b2b;
+color: #fff;
+font-family: Arial, sans-serif;
+width: 100vw;
+}
+
+/* Redes */
+.footer-top {
+text-align: center;
+padding: 30px 10px;
+border-bottom: 1px solid #444;
+width: 100%;
+}
+
+.footer-top p {
+margin-bottom: 15px;
+font-size: 18px;
+width: 100%;
+}
+.footer,
+.footer-top,
+.footer-map,
+.footer-bottom,
+.footer-credits {
+width: 100%;
+}
+
+
+.social-icons {
+display: flex;
+justify-content: center;
+gap: 15px;
+}
+
+.social {
+width: 40px;
+height: 40px;
+border: 2px solid #00bcd4;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: 0.3s;
+}
+
+/* Mapa */
+.footer-map iframe {
+width: 100%;
+height: 300px;
+border: none;
+}
+
+/* Info */
+.footer-bottom {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+gap: 30px;
+padding: 40px;
+background: #2b2b2b;
+}
+
+
+.footer-col h4 {
+margin-bottom: 10px;
+}
+
+.footer-col p {
+font-size: 14px;
+line-height: 1.6;
+}
+
+.footer-col.logo img {
+max-width: 120px;
+}
+
+html {
+scroll-behavior: smooth;
+}
+
+
+/* Contenedor superior para logos y redes */
+.header-social-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px; /* Espacio entre logos y el texto central */
+  padding: 20px 0;
+}
+
+.footer-logo {
+  width: 100px; /* Ajusta el tamaño de tus logos */
+  height: auto;
+}
+
+.social-content {
+  text-align: center;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.social i {
+  font-size: 24px;
+  color: #00d2c3; /* Color cian de los círculos en tu imagen */
+  border-radius: 50%;
+  padding: 10px;
+  transition: 0.3s;
+}
+
+/* Créditos abajo a la derecha */
+.footer-credits {
+  text-align: right;
+  padding: 10px 40px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* ===================================================
+ AJUSTES PARA DISPOSITIVOS MÓVILES Y TABLETS
+ =================================================== */
+
+/* Ajuste general para evitar desbordamiento horizontal */
+body, html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  /* Ajuste de servicios para Tablets (2 columnas) */
+  #serviciosContainer {
+      grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Carrusel de reseñas: 2 tarjetas visibles */
+  .review-card {
+      flex: 0 0 calc(50% - 10px);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Header y Título */
+  .titulo-opciones {
+      font-size: 1.8rem;
+  }
+
+  .logo {
+      height: 120px; /* Logo más pequeño en móvil */
+  }
+
+  /* Navegación: apilar botones si no entran */
+  .nav-links {
+      flex-direction: column;
+      align-items: center;
+  }
+
+  .nav-links a {
+      padding: 8px;
+      font-size: 16px;
+  }
+
+  /* Sección Quiénes Somos */
+  .slideshow-container {
+      height: 300px; /* Reducimos altura del carrusel en móvil */
+  }
+
+  /* Servicios: 1 sola columna en celulares */
+  #serviciosContainer {
+      grid-template-columns: 1fr !important;
+  }
+
+  .card {
+      height: 400px; /* Ajuste de altura de tarjetas */
+  }
+
+  /* Formulario */
+  .half-width {
+      flex: 0 0 100%; /* Los campos de hora ocupan todo el ancho */
+      margin: 0 0 20px 0;
+  }
+
+  #presupuestoSection {
+      padding: 15px;
+      width: 95%;
+  }
+
+  /* Footer */
+  .header-social-container {
+      flex-direction: column;
+      gap: 20px;
+  }
+
+  .footer-bottom {
+      grid-template-columns: 1fr; /* Info del footer una debajo de otra */
+      text-align: center;
+      padding: 20px;
+  }
+
+  .footer-credits {
+      text-align: center;
+  }
+
+  /* Reseñas en móvil */
+  #reviewsSection {
+      padding: 30px 15px;
+  }
+
+  .review-card {
+      flex: 0 0 100%;
+      min-width: 100%;
+  }
+
+  .review-form-container {
+      padding: 20px;
+  }
+
+  .star-rating .star {
+      font-size: 1.6rem;
+  }
+
+  .carousel-arrow {
+      width: 36px;
+      height: 36px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* ... otros estilos que ya tienes ... */
+
+  /* 1. Seleccionamos el SEGUNDO logo y lo ocultamos */
+  .header-social-container .footer-logo:last-of-type {
+      display: none !important;
+  }
+
+  /* 2. Centramos el logo que queda (el primero) */
+  .header-social-container .footer-logo:first-of-type {
+      display: block !important;
+      margin: 0 auto 10px auto !important;
+  }
+
+  /* 3. Aseguramos que las redes sociales se mantengan centradas abajo */
+  .header-social-container {
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+  }
+}
+
+/* Ajuste para pantallas muy pequeñas (iPhone SE, etc) */
+@media (max-width: 400px) {
+  .titulo-opciones {
+      font-size: 1.5rem;
+  }
+
+  .card-content button {
+      margin-bottom: 150px; /* Ajuste del botón sobre la imagen */
+  }
+}

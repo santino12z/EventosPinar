@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventos Pinar - Casamiento</title>
+  <link rel="stylesheet" href="Casamiento.css">
+    <link rel="shortcut icon" href="img/Logo_eventos_pinar_nuevo-removebg-preview.png" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+<body>
+  <header>
+    <img class="logo" src="img/Logo_eventos_pinar_nuevo-removebg-preview.png" alt="eventos pinar">
+    <h1 class="titulo-opciones">Eventos Pinar</h1>
+    <nav class="opciones">
+      <a href="index.html">Inicio</a>
+      <a href="index.html#aboutSection">Quiénes Somos</a>
+      <a href="index.html#serviciosSection">Servicios</a>
+      <a href="index.html#presupuestoSection">Pedir Presupuesto</a>
+    </nav>
+  </header>
+
+  <div class="content-container">
+    <div class="left-content">
+      <h1 class="main-title">Casamiento</h1>
+      <h3 class="title">Los servicios que ofrece el salón son:</h3>
+      <ul class="services">
+        <li>Mozas</li>
+        <li>Animadora</li>
+        <li>Personal de cocina</li>
+        <li>Coordinación</li>
+        <li>Inflable</li>
+        <li>2 Metegoles</li>
+        <li>Cama elastica</li>
+        <li>Manteleria a elección</li>
+        <li>Vajilla Completa</li>
+        <li>Servicio de Café (Para Adultos)</li>
+        <li>Servicio de mate (Para Adultos)</li>
+        <li>Estructura Candy</li>
+        <li>Guardarropas</li>
+        <li>Invitacion Digital</li>
+        <li>Ambiente climatizado</li>
+        <li>led para video</li>
+        <li>Equipo de musica</li>
+        <li>Juego de luces</li>
+        <li>Maquina de humo</li>
+        <li>Servicio de Emergencia</li>
+      </ul>
+      
+      <h3 class="subtitle">Adicionales:</h3>
+      <ul class="additional-services">
+        <li>Fotografo</li>
+        <li>Disc Jockey</li>
+        <li>Maquilladora</li>
+        <li>Cabina fotografica</li>
+        <li>Cabina 360°</li>
+        <li>Plaza Blanda</li>
+        <li>Glitter</li>
+        <li>Barra</li>
+        <li>Catering</li>
+        <li>Menú Infantil</li>
+        <li>Souvenirs (Velas)</li>
+      </ul>
+    </div>
+    
+   <!-- GALERÍA -->
+  <div class="right-content">
+
+<div class="photo-container">
+        <img src="./img/Casamiento/Casamiento_1.jpg" alt="Baby Shower 1" onclick="openModal(this.src, 'image')">
+      </div>
+
+      <div class="photo-container">
+        <img src="./img/Casamiento/Casamiento_2.jpg" alt="Baby Shower 1" onclick="openModal(this.src, 'image2')">
+      </div>
+      
+    
+    <div class="photo-container"><img src="./img/Casamiento/Casamiento_3.jpg"></div>
+    <div class="photo-container"><img src="./img/Casamiento/Casamiento_4.jpg"></div>
+    <div class="photo-container"><img src="./img/Casamiento/Casamiento_5.jpg"></div>
+    <div class="photo-container"><img src="./img/Quince/Quince_2.jpg"></div>
+    <div class="photo-container"><img src="./img/Casamiento/Casamiento_7.jpg"></div>
+    <div class="photo-container"><img src="./img/Casamiento/Casamiento_8.jpg"></div>
+    <div class="photo-container"><img src="./img/Casamiento/Casamiento_9.jpg"></div>
+    <div class="photo-container"><img src="./img/Casamiento/Casamiento_10.jpg"></div>
+    <div class="photo-container"><img src="./img/Casamiento/Casamiento_11.jpg"></div>
+        <div class="photo-container">
+    <img src="img/Fotos-Salon/Imagen_Salon_1.jpg" onclick="openModal(6)">
+  </div>
+
+    <div class="photo-container">
+    <img src="img/Fotos-Salon/Imagen_Salon_2.jpg" onclick="openModal(6)">
+  </div>
+    <div class="photo-container"><img src="./img/Fotos-Salon/Parque_toldo.jpg"></div>
+    <div class="photo-container"><img src="./img/Fotos-Salon/dj_principal.jpg"></div>
+    <div class="photo-container"><img src="./img/Fotos-Salon/Estacionamiento.jpg"></div>
+
+    <div class="photo-container">
+      <video src="./img/Fotos-Salon/Estacionamiento.mp4" muted autoplay loop></video>
+    </div>
+
+    <div class="photo-container">
+      <video src="./img/Baños/bao-mujer.mp4" muted autoplay loop></video>
+    </div>
+
+    <div class="photo-container">
+      <video src="./img/Baños/baño-hombre.mp4" muted autoplay loop></video>
+    </div>
+
+    <div class="photo-container"><img src="./img/Baños/baño-men.jpg"></div>
+    <div class="photo-container"><img src="./img/Baños/Baño-hombre.jpg"></div>
+    <div class="photo-container"><img src="./img/Baños/baño.woman.jpg"></div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="myModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+
+    <img id="modalImage" class="modal-image" style="display:none;">
+    <video id="modalVideo" class="modal-video" controls style="display:none;"></video>
+
+    <div class="arrow-buttons">
+      <button class="arrow-button" id="prevBtn">&lt;</button>
+      <button class="arrow-button" id="nextBtn">&gt;</button>
+    </div>
+
+    <div id="image-counter" class="image-counter"></div>
+  </div>
+</div>
+
+<footer class="footer">
+
+  <div class="footer-top">
+    <div class="header-social-container">
+
+      <img src="img/Logo_eventos_pinar_nuevo-removebg-preview.png" alt="Logo" class="footer-logo">
+
+      <div class="social-content">
+        <p>Seguinos en las redes:</p>
+
+        <div class="social-icons">
+          <a href="https://www.facebook.com/people/Eventos-Pinar/100076113512197/?rdid=MGaVeL1r2YgIsy7M&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F187CA4xuob%2F" target="_blank" class="social">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+
+          <a href="https://www.instagram.com/eventos_pinar/?igsh=MTBmMXc1YzNyMHo3ZA%3D%3D#" target="_blank" class="social">
+            <i class="fab fa-instagram"></i>
+          </a>
+
+          <a href="https://wa.me/5491134334894" target="_blank" class="social">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+        </div>
+      </div>
+
+      <img src="img/Logo_eventos_pinar_nuevo-removebg-preview.png" alt="Logo" class="footer-logo">
+
+    </div>
+  </div>
+
+  <div class="footer-map">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3281.724654519641!2d-58.6276306!3d-34.661642!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcc76f5787627d%3A0xc6651914945d9a9!2sSan%20Francisco%201779%2C%20B1708%20Mor%C3%B3n%2C%20Provincia%20de%20Buenos%20Aires!5e0!3m2!1ses!2sar!4v1700000000000"
+      allowfullscreen=""
+      loading="lazy">
+    </iframe>
+  </div>
+
+  <div class="footer-bottom">
+    <div class="footer-col">
+      <h4>Dirección:</h4>
+      <p>San Francisco 1779<br>(1708) Morón<br>Buenos Aires</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Contacto:</h4>
+      <p>WhatsApp: 11 3433 4894</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Horario de Atención:</h4>
+      <p>Todos los días de 9hs a 20hs.</p>
+    </div>
+  </div>
+
+  <div class="footer-credits">
+    <p>Desarrollado por <strong>Santino Zuleta</strong></p>
+  </div>
+
+</footer>
+
+<script>
+  const modal = document.getElementById('myModal');
+  const modalImg = document.getElementById('modalImage');
+  const modalVideo = document.getElementById('modalVideo');
+  const counter = document.getElementById('image-counter');
+
+  const items = [...document.querySelectorAll('.photo-container img, .photo-container video')];
+  let currentIndex = 0;
+
+  items.forEach((item, index) => {
+    item.addEventListener('click', () => {
+      currentIndex = index;
+      openModal();
+    });
+  });
+
+  function openModal() {
+    modal.style.display = 'block';
+    updateModal();
+  }
+
+  function updateModal() {
+    const item = items[currentIndex];
+
+    modalImg.style.display = 'none';
+    modalVideo.style.display = 'none';
+
+    if (item.tagName === 'IMG') {
+      modalImg.src = item.src;
+      modalImg.style.display = 'block';
+    } else {
+      modalVideo.src = item.src;
+      modalVideo.style.display = 'block';
+      modalVideo.play();
+    }
+
+    counter.textContent = `${currentIndex + 1} / ${items.length}`;
+  }
+
+  function closeModal() {
+    modal.style.display = 'none';
+    modalVideo.pause();
+  }
+
+  document.querySelector('.close').onclick = closeModal;
+  document.getElementById('prevBtn').onclick = () => {
+    currentIndex = (currentIndex - 1 + items.length) % items.length;
+    updateModal();
+  };
+  document.getElementById('nextBtn').onclick = () => {
+    currentIndex = (currentIndex + 1) % items.length;
+    updateModal();
+  };
+
+  window.onclick = e => { if (e.target === modal) closeModal(); };
+
+  document.addEventListener('keydown', e => {
+    if (modal.style.display === 'block') {
+      if (e.key === 'ArrowLeft') document.getElementById('prevBtn').click();
+      if (e.key === 'ArrowRight') document.getElementById('nextBtn').click();
+      if (e.key === 'Escape') closeModal();
+    }
+  });
+</script>
+</body>
+</html>

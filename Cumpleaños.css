@@ -1,0 +1,660 @@
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+header {
+  background-color: #ffffff;
+  width: 100%;
+  text-align: center;
+  padding-top: 25px;
+}
+
+/* Logo centrado arriba */
+.logo {
+  width: 180px;
+  height: auto;
+  margin: 0 auto 8px auto; /* espacio pequeño arriba del texto */
+  display: block;
+}
+
+/* Título debajo del logo */
+.titulo-opciones {
+  font-size: 4rem;
+  margin: 0 0 20px 0;
+}
+
+  .opciones {
+    background-color: #0d500a;
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+  }
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+nav a {
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+nav a:hover {
+  color: #e0e0e0;
+}
+
+/* Main content container */
+.content-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 20px;
+}
+
+.left-content {
+  width: 50%;
+  padding: 20px;
+}
+
+.right-content {
+  width: 50%;
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Photo gallery */
+.photo-container {
+  width: calc(33.33% - 10px);
+  height: 150px;
+  border: 1px solid #ccc;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.photo-container:hover {
+  transform: scale(1.05);
+}
+
+.photo-container img,
+.photo-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Typography */
+.main-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.services {
+  font-size: 1.25rem;
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.additional-services {
+  font-size: 1.25rem;
+  margin-left: 20px;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding-top: 60px;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 900px;
+  position: relative;
+}
+
+.close {
+  color: #aaa;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+}
+
+.modal-image,
+.modal-video {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.arrow-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.arrow-button {
+  background-color: #ccc;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 0 10px;
+  font-size: 1.2rem;
+}
+
+.arrow-button:hover {
+  background-color: #ddd;
+}
+
+.image-counter {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.footer {
+  width: 100%;
+  background: #2b2b2b;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* Redes */
+.footer-top {
+  text-align: center;
+  padding: 30px 10px;
+  border-bottom: 1px solid #444;
+}
+
+.footer-top p {
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.social {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #00bcd4;
+  text-decoration: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.3s;
+}
+
+/* Mapa */
+.footer-map iframe {
+  width: 100%;
+  height: 300px;
+  border: none;
+}
+
+/* Info */
+.footer-bottom {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  padding: 40px;
+  background: #333;
+}
+
+.footer-col h4 {
+  margin-bottom: 10px;
+}
+
+.footer-col p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.footer-col.logo img {
+  max-width: 120px;
+}
+
+
+
+/* Scroll Top */
+#scrollTop {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #444;
+  color: #fff;
+  border: none;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+}
+
+/* Contenedor superior para logos y redes */
+.header-social-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px; /* Espacio entre logos y el texto central */
+    padding: 20px 0;
+}
+
+.footer-logo {
+    width: 100px; /* Ajusta el tamaño de tus logos */
+    height: auto;
+}
+
+.social-content {
+    text-align: center;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.social i {
+    font-size: 24px;
+    color: #00d2c3; /* Color cian de los círculos en tu imagen */
+    border-radius: 50%;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+/* Créditos abajo a la derecha */
+.footer-credits {
+    text-align: right;
+    padding: 10px 40px;
+    font-size: 12px;
+    color: #888;
+}
+
+/* ===================================================
+   VERSION FINAL RESPONSIVE - SOLUCIÓN DE LOGOS
+   =================================================== */
+
+body, html {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    .photo-container {
+        width: calc(50% - 10px); 
+        height: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    
+    /* 1. HEADER: Centrado absoluto con Flexbox */
+    header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        padding: 20px 0 !important;
+        text-align: center !important;
+    }
+
+    /* 2. LOGO SUPERIOR: Eliminamos cualquier desplazamiento */
+    .logo {
+        display: block !important;
+        margin: 0 auto 15px auto !important;
+        width: 130px !important; 
+        height: auto !important;
+        float: none !important;
+        position: static !important;
+    }
+
+    /* 3. TITULO: Ajuste de ancho */
+    .titulo-opciones {
+        width: 100% !important;
+        font-size: 2.2rem !important;
+        text-align: center !important;
+        margin: 10px 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 4. NAVEGACIÓN VERDE */
+    .opciones {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 15px 0 !important;
+    }
+
+    nav {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+
+    /* 5. FOOTER: Un solo logo y centrado */
+    .header-social-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 20px !important;
+        width: 100% !important;
+    }
+
+    /* Ocultamos el segundo logo en el footer */
+    .header-social-container .footer-logo:last-of-type {
+        display: none !important;
+    }
+
+    /* Centramos el que queda */
+    .header-social-container .footer-logo:first-of-type {
+        display: block !important;
+        margin: 0 auto 10px auto !important;
+        width: 100px !important;
+    }
+
+    /* 6. CONTENIDO */
+    .content-container {
+        flex-direction: column !important;
+        padding: 15px !important;
+    }
+
+    .left-content, .right-content {
+        width: 100% !important;
+        padding: 10px 0 !important;
+    }
+
+    .photo-container {
+        width: calc(50% - 5px) !important;
+        height: 140px !important;
+    }
+}
+/* --- Este código afecta SOLO a pantallas de 768px o menos --- */
+@media (max-width: 768px) {
+    
+    /* Ocultamos el segundo logo en el footer */
+    .header-social-container .footer-logo:last-of-type {
+        display: none !important;
+    }
+
+    /* Centramos el único logo que queda */
+    .header-social-container .footer-logo:first-of-type {
+        display: block !important;
+        margin: 0 auto 20px auto !important;
+    }
+
+    /* Aseguramos que el contenedor de redes se apile verticalmente */
+    .header-social-container {
+        flex-direction: column !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .photo-container {
+        width: 100% !important;
+        height: 220px !important;
+    }
+}
+
+/* ===================================================
+   OPTIMIZACIÓN EXTREMA PARA PANTALLAS DE 320px
+   =================================================== */
+
+@media (max-width: 320px) {
+    /* Forzamos que el contenedor no tenga espacios laterales que empujen el logo */
+    header {
+        padding: 15px 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+
+    /* Reducimos el logo para que quepa bien en 320px sin empujar el borde */
+    .logo {
+        width: 100px !important; 
+        max-width: 100% !important;
+        margin: 0 auto 10px auto !important;
+        display: block !important;
+                height: auto !important;
+    }
+
+    /* El título debe ser más pequeño o se cortará */
+    .titulo-opciones {
+        font-size: 1.6rem !important;
+        width: 100% !important;
+        text-align: center !important;
+        margin: 5px 0 !important;
+        letter-spacing: -1px; /* Junta un poco las letras para ganar espacio */
+    }
+
+    /* Navegación ultra compacta */
+    .opciones {
+        padding: 10px 0 !important;
+    }
+
+    nav a {
+        font-size: 1rem !important;
+        margin: 3px 0 !important;
+    }
+
+    /* Ajuste de los logos del Footer para que no choquen entre sí */
+    .header-social-container {
+        gap: 15px !important;
+        padding: 10px 0 !important;
+    }
+
+    .footer-logo {
+        width: 70px !important; /* Logos más pequeños en el footer */
+        margin: 0 auto !important;
+    }
+
+    /* Contenido principal al 100% de ancho real */
+    .content-container {
+        padding: 5px !important;
+    }
+
+    .left-content, .right-content {
+        padding: 5px !important;
+    }
+
+    .main-title {
+        font-size: 1.7rem !important;
+    }
+
+    /* Fotos: Una sola columna para que se vean bien en 320px */
+    .photo-container {
+        width: 100% !important;
+        height: 180px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    /* Ajuste de listas para que no se salgan del margen */
+    .services, .additional-services {
+        margin-left: 10px !important;
+        font-size: 1rem !important;
+    }
+}
+/* ===================================================
+   DIAGNÓSTICO Y SOLUCIÓN FINAL UNIFICADA
+   =================================================== */
+
+/* Evita desbordamientos */
+html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* --- SOLO PARA DIAGNÓSTICO (Borrar cuando esté centrado) --- */
+header { outline: 2px solid rgba(255, 0, 0, 0) !important; }
+.logo { outline: 2px solid rgba(0, 0, 255, 0) !important; }
+.titulo-opciones { outline: 2px solid rgba(0, 128, 0, 0) !important; }
+/* ----------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+    .photo-container {
+        width: calc(50% - 10px); 
+        height: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    
+    /* 1. HEADER: Forzamos comportamiento de bloque central */
+    header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;  /* CENTRA TODO EN EL EJE X */
+        justify-content: center !important;
+        width: 100% !important;
+        padding: 20px 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 2. LOGO: Reseteo de cualquier propiedad que lo mueva */
+    .logo {
+        display: block !important;
+        margin: 0 auto 15px auto !important; /* Margen auto es clave */
+        width: 130px !important; 
+        height: auto !important;
+        float: none !important;
+        position: static !important; /* Anula absolutos o relativos de PC */
+        transform: none !important;  /* Anula traslaciones */
+    }
+
+    /* 3. TÍTULO: Forzamos que no empuje el diseño */
+    .titulo-opciones {
+        width: 100% !important;
+        font-size: 2.2rem !important;
+        text-align: center !important;
+        margin: 10px 0 !important;
+        padding: 0 10px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 4. NAVEGACIÓN (Barra verde) */
+    .opciones {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 15px 0 !important;
+    }
+
+    nav {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+
+    /* 5. FOOTER: Un solo logo centrado */
+    .header-social-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 20px !important;
+    }
+
+    .header-social-container .footer-logo:last-of-type {
+        display: none !important; /* Oculta el segundo logo */
+    }
+
+    .header-social-container .footer-logo:first-of-type {
+        display: block !important;
+        margin: 0 auto !important;
+        width: 100px !important;
+    }
+
+    /* 6. CONTENIDO */
+    .content-container {
+        flex-direction: column !important;
+        padding: 15px !important;
+    }
+
+    .left-content, .right-content {
+        width: 100% !important;
+        padding: 10px 0 !important;
+    }
+
+    .photo-container {
+        width: calc(50% - 5px) !important;
+        height: 140px !important;
+    }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 480px) {
+    .photo-container { width: 100% !important; height: 220px !important; }
+}
+
+@media (max-width: 320px) {
+    .logo { width: 100px !important; }
+    .titulo-opciones { font-size: 1.6rem !important; }
+}
